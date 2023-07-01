@@ -1,3 +1,4 @@
 config/prod.json
 release.sh
 persistance.yaml
+node_modules

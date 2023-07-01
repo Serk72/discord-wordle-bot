@@ -1,14 +1,12 @@
 const { Client, GatewayIntentBits, EmbedBuilder, Events, Collection, userMention, bold, italic, underscore   } = require('discord.js');
 const { WordleGame } = require('./data/WordleGames');
 const { Score } = require('./data/Scores');
-const { Summary } = require('./data/Summary');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent] });
 const config = require('config');
 
 
 let wordleGame = new WordleGame();
 let wordleScore = new Score();
-let savedSummary = new Summary();
 const INSULT_USERNAME = config.get('insultUserName');
 const WORDLE_CHANNEL_ID = config.get('wordleMonitorChannelID');
 const FOOTER_MESSAGE = config.get('footerMessage');
@@ -139,55 +137,9 @@ let sendSQLSummary = async () => {
   }
   await wordleChannel.send({ embeds: [embed] });
 }
-let sendSummary = async (wordleSummary, detailed = false) => {
-  await savedSummary.connect();
-  if (!wordleSummary) {
-    wordleSummary = (await savedSummary.getSummary())?.summary;
-  }
-  const wordleChannel = client.channels.cache.get(WORDLE_CHANNEL_ID);
-  let score = 0;
-  let gamesPlayed = 0;
-  let scoredUsers = Object.keys(wordleSummary);
-  scoredUsers.forEach((user) => {
-    score += wordleSummary[user].score;
-    gamesPlayed += wordleSummary[user].games?.length || wordleSummary[user].games;
-  });
-  let sortedUsers = scoredUsers.sort((userA, userB) => (wordleSummary[userB].games?.length || wordleSummary[userB].games)- (wordleSummary[userA].games?.length || wordleSummary[userA].games));
-  let bayesianC = wordleSummary[sortedUsers[sortedUsers.length-2]].games?.length || wordleSummary[sortedUsers[sortedUsers.length-2]].games
-  const overallAverage = score / gamesPlayed;
-  const embed = new EmbedBuilder()
-  .setTitle('Wordle Summary')
-  .setColor('#4169e1'); // set the color of the em
-  Object.keys(wordleSummary).forEach((user) => {
-    let totalGames = wordleSummary[user].games?.length || wordleSummary[user].games;
-    if (detailed) {
-      embed.addFields({name: `${underscore(italic(bold(user)))}`,
-            value: `            ${bold('Games Played')}: ${totalGames}
-            ${bold('Games Lost')}: ${wordleSummary[user].gamesLost}
-            ${bold('Score')}: ${wordleSummary[user].score}/${totalGames * 6}
-            ${bold('Calculated')}: ${(wordleSummary[user].score/(totalGames * 6)).toFixed(2)}
-            ${bold('Hard Games')}: ${wordleSummary[user].hardGames?.length || wordleSummary[user].hardGames}
-            ${bold('Hard Score')}: ${wordleSummary[user].hardScore}/${(wordleSummary[user].hardGames?.length || wordleSummary[user].hardGames) * 6}
-            ${bold('Hard Calculated')}:  ${(wordleSummary[user].hardScore/((wordleSummary[user].hardGames?.length || wordleSummary[user].hardGames) * 6)).toFixed(2)}
-            `});
-    } else {
-      embed.addFields({name: `${underscore(italic(bold(user)))}`,
-      value: `${bold('Games Played')}: ${totalGames}
-      ${bold('Games Lost')}: ${wordleSummary[user].gamesLost}
-      ${bold('Average Score')}: ${(wordleSummary[user].score/(totalGames)).toFixed(2)}
-      ${bold('Bayesian Score')}: ${((wordleSummary[user].score + (bayesianC * overallAverage))/(totalGames + bayesianC)).toFixed(2)}
-      `});
-    }
-  })
-  embed.setDescription(`Wordle current scores.`)
-  embed.setFooter({ text: `${FOOTER_MESSAGE ? `${FOOTER_MESSAGE},`: ''} Baysian m=${overallAverage} C=${bayesianC}` } );
 
-  wordleChannel.send({ embeds: [embed] });
-  await savedSummary.disconnect();
-}
 let readAllMessages = async () => {
   const wordleChannel = client.channels.cache.get(WORDLE_CHANNEL_ID);
-  let wordleSummary = {};
   let tempMessages = await wordleChannel.messages.fetch({ limit: 50 });
   let messages = [];
   while (tempMessages.size > 0)
@@ -197,60 +149,17 @@ let readAllMessages = async () => {
   }
   await wordleGame.connect();
   await wordleScore.connect();
-  await savedSummary.connect();
  for (index in messages) {
   let message = messages[index];
   let regex = /Wordle [0-9]* [0-6Xx]\/[0-6]\*?/g
   const found = message?.content?.match(regex);
   if (found && found.length) {
-    if (!wordleSummary[message.author.username]) {
-      wordleSummary[message.author.username] = {
-        games: 0,
-        hardGames: 0,
-        score: 0,
-        hardScore: 0,
-        gamesLost: 0,
-        tag: message.author.tag,
-        id: message.author.id
-      };
-    }
-    if (!wordleSummary[message.author.username].id) {
-      wordleSummary[message.author.username].id = message.author.id
-    }
     let wordle = found[0];
     let subWordle = wordle.substring(wordle.indexOf(' ')+1);
     let wordleNumber = Number(subWordle.substring(0,subWordle.indexOf(' ')))
 
     if (!(await wordleGame.getWordleGame(wordleNumber))) {
       await wordleGame.createWordleGame(wordleNumber, message.createdTimestamp);
-    }
-
-    if (wordle.includes('*')) {
-      if (wordleSummary[message.author.username].hardGames?.length) {
-        wordleSummary[message.author.username].hardGames = wordleSummary[message.author.username].hardGames.length;
-      }
-      wordleSummary[message.author.username].hardGames++;
-    }
-    if (wordleSummary[message.author.username].games?.length) {
-      wordleSummary[message.author.username].games = wordleSummary[message.author.username].games.length;
-    }
-    wordleSummary[message.author.username].games++;
-
-
-    let score = Number(subWordle.substring(subWordle.indexOf(' ') + 1, subWordle.indexOf('/')));
-    if (Number.isNaN(score)) {
-      wordleSummary[message.author.username].score += 7
-      wordleSummary[message.author.username].gamesLost++;
-    } else {
-      wordleSummary[message.author.username].score += score;
-    }
-
-    if (wordle.includes('*')) {
-      if (Number.isNaN(score)) {
-        wordleSummary[message.author.username].hardScore += 7
-      } else {
-        wordleSummary[message.author.username].hardScore += score;
-      }
     }
 
     if (!(await wordleScore.getScore(message.author.username, wordleNumber))) {
@@ -260,30 +169,15 @@ let readAllMessages = async () => {
  }
 
 
-  await savedSummary.createSummary(wordleSummary);
   await wordleGame.disconnect();
   await wordleScore.disconnect();
-  await savedSummary.disconnect();
-
 }
 
 let addWorldScore = async (message) => {
   await wordleGame.connect();
   await wordleScore.connect();
-  await savedSummary.connect();
   let regex = /Wordle [0-9]* [0-6Xx]\/[0-6]\*?/g
   const found = message?.content?.match(regex);
-  let wordleSummary = (await savedSummary.getSummary())?.summary;
-  if (!wordleSummary[message.author.username]) {
-    wordleSummary[message.author.username] = {
-      games: [],
-      hardGames: [],
-      score: 0,
-      hardScore: 0,
-      gamesLost: 0,
-      tag: message.author.tag
-    };
-  }
   let wordle = found[0];
   let subWordle = wordle.substring(wordle.indexOf(' ')+1);
   let wordleNumber = Number(subWordle.substring(0,subWordle.indexOf(' ')))
@@ -292,38 +186,9 @@ let addWorldScore = async (message) => {
     await wordleGame.createWordleGame(wordleNumber, message.createdTimestamp);
   }
 
-  if (wordle.includes('*')) {
-    if (wordleSummary[message.author.username].hardGames?.length) {
-      wordleSummary[message.author.username].hardGames = wordleSummary[message.author.username].hardGames.length;
-    }
-    wordleSummary[message.author.username].hardGames++;
-  }
-  if (wordleSummary[message.author.username].games?.length) {
-    wordleSummary[message.author.username].games = wordleSummary[message.author.username].games.length;
-  }
-  wordleSummary[message.author.username].games++;
-
-
-  let score = Number(subWordle.substring(subWordle.indexOf(' ') + 1, subWordle.indexOf('/')));
-  if (Number.isNaN(score)) {
-    wordleSummary[message.author.username].score += 7
-    wordleSummary[message.author.username].gamesLost++;
-  } else {
-    wordleSummary[message.author.username].score += score;
-  }
-
-  if (wordle.includes('*')) {
-    if (Number.isNaN(score)) {
-      wordleSummary[message.author.username].hardScore += 7
-    } else {
-      wordleSummary[message.author.username].hardScore += score;
-    }
-  }
-
   if (!(await wordleScore.getScore(message.author.username, wordleNumber))) {
     await wordleScore.createScore(message.author.username, message.author.tag, wordle, wordleNumber, message.createdTimestamp)
   }
-  await savedSummary.createSummary(wordleSummary);
 
   const latestGame = await wordleGame.getLatestGame();
   let totalPlayes = await wordleScore.getTotalPlayers()
@@ -331,7 +196,7 @@ let addWorldScore = async (message) => {
   let remaining = totalPlayes.filter((player) => !gamePlayers.includes(player))
   console.log(remaining)
   if (!remaining.length) {
-    await sendSQLSummary(wordleSummary, false);
+    await sendSQLSummary();
   } else if (remaining.length === 1){
     if (remaining[0] === INSULT_USERNAME) {
       await whoIsLeft();
@@ -340,7 +205,6 @@ let addWorldScore = async (message) => {
 
   await wordleGame.disconnect();
   await wordleScore.disconnect();
-  await savedSummary.disconnect();
 };
 
 
