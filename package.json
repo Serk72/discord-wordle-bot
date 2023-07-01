@@ -1,0 +1,11 @@
+{
+  "version": "0.1.0",
+  "dependencies": {
+    "config": "3.3.9",
+    "discord.js": "14.8.0",
+    "pg": "8.10.0"
+  },
+  "scripts": {
+    "start": "node start.js"
+  }
+}

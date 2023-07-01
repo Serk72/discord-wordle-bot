@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discord-wordle
+  labels:
+    app: discord-wordle
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discord-wordle
+  template:
+    metadata:
+      labels:
+        app: discord-wordle
+    spec:
+      containers:
+        - name: discord-wordle
+          env:
+          - name: NODE_ENV
+            value: "prod"
+          image: "{{ .Values.image.repository}}:{{ .Values.image.tag }}"
+          workingDir: /workdir/discord-wordle
+          imagePullPolicy: IfNotPresent
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          {{- if .Values.existingClaimName }}
+          volumeMounts:
+            - name: discord-wordle-pvc
+              mountPath: '/workdir'
+          {{- end }}
+          command:
+            - npm
+            - run
+            - start
+      restartPolicy: Always
+      dnsPolicy: ClusterFirstWithHostNet
+      enableServiceLinks: true
+      hostNetwork: true
+      {{- if .Values.existingClaimName }}
+      volumes:
+        - name: discord-wordle-pvc
+          persistentVolumeClaim:
+            claimName: {{.Values.existingClaimName}}
+      {{- end }}
+      
