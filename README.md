@@ -1,10 +1,5 @@
 # discord-wordle-bot
-[![GitHub Release](https://img.shields.io/github/release/Serk72/discord-wordle-bot.svg?logo=github)](https://github.com/Serk72/discord-wordle-bot/releases)
-[![Build Status](https://github.com/Serk72/discord-wordle-bot/actions/workflows/main.yml/badge.svg)](https://github.com/Serk72/discord-wordle-bot/actions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/Serk72/discord-wordle-bot/blob/main/LICENSE)
-[![Coverage Status](https://codecov.io/github/Serk72/discord-wordle-bot/branch/main/graph/badge.svg)](https://codecov.io/github/Serk72/discord-wordle-bot)
-[![CodeQL](https://github.com/Serk72/discord-wordle-bot/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Serk72/discord-wordle-bot/actions/workflows/codeql-analysis.yml)
-[![Downloads](https://img.shields.io/github/downloads/Serk72/discord-wordle-bot/total?logo=github)](https://github.com/Serk72/discord-wordle-bot/releases)
 
 Discord bot for monitoring a channel for wordle scores
 
