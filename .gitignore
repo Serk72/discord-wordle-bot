@@ -1,4 +1,5 @@
-config/prod.json
+config/*
+!config/default.js
 release.sh
 persistance.yaml
 node_modules

@@ -1,16 +1,16 @@
-const {Pool, Client} = require('pg');
+const {Pool} = require('pg');
 const config = require('config');
 const DATABASE_CONFIG = config.get('postgres');
 /**
  * Data Access Layer for the WordleGame Table
  */
 class WordleGame {
-  client;
+  pool;
   /**
    * Constructor
    */
   constructor() {
-    const pool = new Pool({
+    this.pool = new Pool({
       user: DATABASE_CONFIG.user,
       host: DATABASE_CONFIG.host,
       database: DATABASE_CONFIG.database,
@@ -18,34 +18,16 @@ class WordleGame {
       port: DATABASE_CONFIG.port,
     });
     const tablesSQL = 'CREATE TABLE IF NOT EXISTS WordleGame (Id serial PRIMARY KEY, WordleGame INT NOT NULL UNIQUE, Word VARCHAR (255), Date TIMESTAMP);';
-    pool.query(tablesSQL, (err, res) => {
+    this.pool.query(tablesSQL, (err, res) => {
       if (err) {
         console.error(err);
         return;
       }
     });
-  }
-
-  /**
-   * Connects to the database.
-   */
-  async connect() {
-    if (!this.client) {
-      this.client = new Client({
-        connectionString: DATABASE_CONFIG.connectionString,
-      });
-      await this.client.connect();
-    }
-  }
-
-  /**
-   * Disconnects from the database.
-   */
-  async disconnect() {
-    if (this.client) {
-      await this.client.end();
-      this.client = null;
-    }
+    this.pool.on('error', (err, client) => {
+      console.error('Unexpected error on idle client', err);
+      process.exit(-1);
+    });
   }
 
   /**
@@ -55,7 +37,7 @@ class WordleGame {
    */
   async getWordleGame(wordleGame) {
     try {
-      const results = await this.client.query('SELECT * FROM WordleGame WHERE wordlegame = $1', [wordleGame]);
+      const results = await this.pool.query('SELECT * FROM WordleGame WHERE wordlegame = $1', [wordleGame]);
       return results?.rows?.[0];
     } catch (ex) {
       console.log(ex);
@@ -68,7 +50,7 @@ class WordleGame {
    * @return {*} the latest game recorded in the database.
    */
   async getLatestGame() {
-    const results = await this.client.query('SELECT * FROM WordleGame ORDER BY WordleGame DESC LIMIT 1', []);
+    const results = await this.pool.query('SELECT * FROM WordleGame ORDER BY WordleGame DESC LIMIT 1', []);
     return results?.rows?.[0]?.wordlegame;
   }
 
@@ -78,7 +60,7 @@ class WordleGame {
    * @param {*} timestamp The timestamp of when the game was added.
    */
   async createWordleGame(wordleGame, timestamp) {
-    await this.client.query(`INSERT INTO WordleGame(WordleGame, Date) VALUES ($1, to_timestamp($2))`, [wordleGame, timestamp / 1000]);
+    await this.pool.query(`INSERT INTO WordleGame(WordleGame, Date) VALUES ($1, to_timestamp($2))`, [wordleGame, timestamp / 1000]);
   }
 }
 module.exports = {WordleGame};

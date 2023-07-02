@@ -26,8 +26,6 @@ class WordleBotClient {
    * indicated players that have not finished yet to the WORDLE_CHANNEL_ID channel.
    */
   async _whoIsLeft() {
-    await this.wordleGame.connect();
-    await this.wordleScore.connect();
     const latestGame = await this.wordleGame.getLatestGame();
     const totalPlayes = await this.wordleScore.getTotalPlayers();
     const gamePlayers = await this.wordleScore.getPlayersForGame(latestGame);
@@ -80,14 +78,11 @@ class WordleBotClient {
 
 
     await this.discordWordleChannel.send({embeds: [embed]});
-    await this.wordleGame.disconnect();
-    await this.wordleScore.disconnect();
   }
   /**
    * Calculates and sends the monthly summary for all plays for last month.
    */
   async _sendSQLMonthly() {
-    await this.wordleScore.connect();
     const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
 
     const embed = new EmbedBuilder()
@@ -106,13 +101,11 @@ class WordleBotClient {
       embed.setFooter({text: FOOTER_MESSAGE} );
     }
     await this.discordWordleChannel.send({embeds: [embed]});
-    await this.wordleScore.disconnect();
   }
   /**
    * Calculates and sends the overall average summaries for all players in the game.
    */
   async _sendSQLSummary() {
-    await this.wordleScore.connect();
     const overallSummary = await this.wordleScore.getPlayerSummaries();
     const day7Summary = await this.wordleScore.getLast7DaysSummaries();
     let score = 0;
@@ -154,7 +147,6 @@ class WordleBotClient {
       embed.setFooter({text: FOOTER_MESSAGE} );
     }
     await this.discordWordleChannel.send({embeds: [embed]});
-    await this.wordleScore.disconnect();
   }
   /**
    * Reads all messages in the discordWordleChannel to find and store all Wordle scores.
@@ -167,8 +159,6 @@ class WordleBotClient {
       tempMessages.forEach((msg) => messages.push(msg));
       tempMessages = await this.discordWordleChannel.messages.fetch({before: tempMessages.last().id});
     }
-    await this.wordleGame.connect();
-    await this.wordleScore.connect();
     await Promise.all(messages?.map(async (message) => {
       const found = message?.content?.match(WORDLE_REGEX);
       if (found && found.length) {
@@ -185,18 +175,12 @@ class WordleBotClient {
         }
       }
     }));
-
-
-    await this.wordleGame.disconnect();
-    await this.wordleScore.disconnect();
   }
   /**
    * Adds a new Score to the database. Scores already added will be ignored.
    * @param {*} message discord message containing a wordle score.
    */
   async _addWorldScore(message) {
-    await this.wordleGame.connect();
-    await this.wordleScore.connect();
     const found = message?.content?.match(WORDLE_REGEX);
     const wordle = found[0];
     const subWordle = wordle.substring(wordle.indexOf(' ')+1);
@@ -222,9 +206,6 @@ class WordleBotClient {
         await this._whoIsLeft();
       }
     }
-
-    await this.wordleGame.disconnect();
-    await this.wordleScore.disconnect();
   }
   /**
    * Discord Edit Event Handler
@@ -237,12 +218,9 @@ class WordleBotClient {
     console.log(newMessage?.content);
     const found = newMessage?.content?.match(WORDLE_REGEX);
     if (found && found.length) {
-      await this.wordleScore.connect();
       if ((await this.wordleScore.getScore(newMessage.author.username, wordleNumber))) {
-        await this.wordleScore.disconnect();
         await newMessage.lineReply('I saw that, Edited Wordle Score Ignored.');
       } else {
-        await this.wordleScore.disconnect();
         await this._addWorldScore(newMessage);
         await newMessage.lineReply('I got you, Edited Wordle Score Counted.');
       }
