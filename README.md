@@ -14,7 +14,6 @@ This application is configured using https://github.com/node-config/node-config 
 | `insultUserName`               | String    | Discord username that is specified will get a random insult generated if they are the last to complete the wordle for the day. |  |
 | `discordBotToken`              | String    | Bot token from discord giving the bot access to discord apis. |  |
 | `postgres`                     | Object    | Database connection Info |  | 
-| `postgres.connectionString`    | String    | Full connection string to the postgres database.                              |  |
 | `postgres.password`            | String    | Password for the database   |  |
 | `postgres.database`            | String    | Database name                  | ` |
 | `postgres.user`                | String    | Database user  | |
