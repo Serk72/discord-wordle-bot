@@ -2,6 +2,8 @@ const config = require('config');
 const {EmbedBuilder, bold, italic, underscore} = require('discord.js');
 const {WordleGame} = require('./data/WordleGame');
 const {Score} = require('./data/Score');
+const AsciiTable = require('ascii-table');
+
 
 const INSULT_USERNAME = config.get('insultUserName');
 const WORDLE_CHANNEL_ID = config.get('wordleMonitorChannelID');
@@ -119,41 +121,34 @@ class WordleBotClient {
       score += +row.totalscore;
       gamesPlayed += +row.games;
     });
-    const bayesianC = +(overallSummary[overallSummary.length-2].games);
     const overallAverage = score / gamesPlayed;
-    const embed = new EmbedBuilder()
-        .setTitle('Wordle Summary')
-        .setColor('#4169e1'); // set the color of the em
+    const summaryTable = new AsciiTable('Wordle Summary');
+    summaryTable.setHeading('User', 'GP', 'AS', '7DA');
     overallSummary.forEach((row) => {
-      const day7Sum = {
+      const totalGames = +row.games;
+      const day7Summary = {
+        gamesPlayed: '',
         average: '',
-        games: '',
-        lost: '',
+        gamesLost: '',
       };
       if (sum7dayByUser[row.username]) {
-        day7Sum.games = sum7dayByUser[row.username].games;
-        day7Sum.average = sum7dayByUser[row.username].average;
-        day7Sum.lost = sum7dayByUser[row.username].gameslost;
+        day7Summary.gamesPlayed = sum7dayByUser[row.username].games;
+        day7Summary.average = sum7dayByUser[row.username].average;
+        day7Summary.gamesLost = sum7dayByUser[row.username].gameslost;
       }
-      const totalGames = +row.games;
-      embed.addFields({name: `${underscore(italic(bold(row.username)))}`,
-        value: `${bold('Games Played')}: ${totalGames}
-      ${bold('Games Lost')}: ${row.gameslost}
-      ${bold('Average Score')}: ${row.average}
-      ${bold('Bayesian Score')}: ${((+row.totalscore + (bayesianC * overallAverage))/(totalGames + bayesianC)).toFixed(2)}
-      ${bold('7 day Games Played')}: ${day7Sum.games}
-      ${bold('7 day Games Lost')}: ${day7Sum.lost}
-      ${bold('7 day Average Score')}: ${day7Sum.average}
-      `});
+      summaryTable.addRow(
+          row.username,
+          totalGames,
+          row.average,
+          day7Summary.average);
     });
-    embed.setDescription(`Wordle current scores.`);
-    embed.addFields({name: `${underscore(italic(bold('Overall Leaders')))}`,
-      value: `${bold('Overall Leader')}: ${overallSummary[0].username}
-  ${bold('7 day Leader')}: ${day7Summary[0].username}
-  ${bold(`${lastMonthSummary?.[0]?.lastmonth?.trim()}`)}: ${lastMonthSummary?.[0].username}
-  `});
-    embed.setFooter({text: `${FOOTER_MESSAGE ? `${FOOTER_MESSAGE},`: ''} Baysian m=${overallAverage} C=${bayesianC}`} );
-    await this.discordWordleChannel.send({embeds: [embed]});
+
+    await this.discordWordleChannel.send(`\`\`\`
+${summaryTable.toString()}\`\`\`
+  ***Overall Leader: ${overallSummary[0].username}***
+  **7 Day Leader: ${day7Summary[0].username}**
+  **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${lastMonthSummary?.[0]?.username}**
+*${FOOTER_MESSAGE ? `${FOOTER_MESSAGE},`: ''} Overall Average=${overallAverage}*`);
   }
   /**
    * Reads all messages in the discordWordleChannel to find and store all Wordle scores.
@@ -239,6 +234,9 @@ class WordleBotClient {
    * @return {*}
    */
   async messageHandler(message) {
+    if (message.channelId !== WORDLE_CHANNEL_ID) {
+      return;
+    }
     if (message.content.startsWith('!whoLeft') || message.content.startsWith('/whoLeft')) {
       message.delete();
       await this._whoIsLeft();
@@ -254,11 +252,9 @@ class WordleBotClient {
       await this._sendSQLMonthly();
       return;
     }
-    if (message.channelId === WORDLE_CHANNEL_ID) {
-      const found = message?.content?.match(WORDLE_REGEX);
-      if (found && found.length) {
-        await this._addWorldScore(message);
-      }
+    const found = message?.content?.match(WORDLE_REGEX);
+    if (found && found.length) {
+      await this._addWorldScore(message);
     }
   }
 }

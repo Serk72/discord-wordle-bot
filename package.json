@@ -1,6 +1,7 @@
 {
   "version": "0.1.0",
   "dependencies": {
+    "ascii-table": "0.0.9",
     "config": "3.3.9",
     "discord.js": "14.11.0",
     "pg": "8.11.1"
@@ -11,6 +12,7 @@
     
   },
   "scripts": {
+    "local": "NODE_ENV=dev node start.js",
     "start": "node start.js",
     "lint": "npx eslint --ext .js ."
   }
