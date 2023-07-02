@@ -108,6 +108,11 @@ class WordleBotClient {
   async _sendSQLSummary() {
     const overallSummary = await this.wordleScore.getPlayerSummaries();
     const day7Summary = await this.wordleScore.getLast7DaysSummaries();
+    const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
+    const sum7dayByUser = day7Summary.reduce((acc, sum) => {
+      acc[sum.username] = sum;
+      return acc;
+    }, {});
     let score = 0;
     let gamesPlayed = 0;
     overallSummary.forEach((row) => {
@@ -116,36 +121,38 @@ class WordleBotClient {
     });
     const bayesianC = +(overallSummary[overallSummary.length-2].games);
     const overallAverage = score / gamesPlayed;
-    let embed = new EmbedBuilder()
+    const embed = new EmbedBuilder()
         .setTitle('Wordle Summary')
         .setColor('#4169e1'); // set the color of the em
     overallSummary.forEach((row) => {
+      const day7Sum = {
+        average: '',
+        games: '',
+        lost: '',
+      };
+      if (sum7dayByUser[row.username]) {
+        day7Sum.games = sum7dayByUser[row.username].games;
+        day7Sum.average = sum7dayByUser[row.username].average;
+        day7Sum.lost = sum7dayByUser[row.username].gameslost;
+      }
       const totalGames = +row.games;
       embed.addFields({name: `${underscore(italic(bold(row.username)))}`,
         value: `${bold('Games Played')}: ${totalGames}
       ${bold('Games Lost')}: ${row.gameslost}
       ${bold('Average Score')}: ${row.average}
       ${bold('Bayesian Score')}: ${((+row.totalscore + (bayesianC * overallAverage))/(totalGames + bayesianC)).toFixed(2)}
+      ${bold('7 day Games Played')}: ${day7Sum.games}
+      ${bold('7 day Games Lost')}: ${day7Sum.lost}
+      ${bold('7 day Average Score')}: ${day7Sum.average}
       `});
     });
     embed.setDescription(`Wordle current scores.`);
+    embed.addFields({name: `${underscore(italic(bold('Overall Leaders')))}`,
+      value: `${bold('Overall Leader')}: ${overallSummary[0].username}
+  ${bold('7 day Leader')}: ${day7Summary[0].username}
+  ${bold(`${lastMonthSummary?.[0]?.lastmonth?.trim()}`)}: ${lastMonthSummary?.[0].username}
+  `});
     embed.setFooter({text: `${FOOTER_MESSAGE ? `${FOOTER_MESSAGE},`: ''} Baysian m=${overallAverage} C=${bayesianC}`} );
-    await wordleChannel.send({embeds: [embed]});
-    embed = new EmbedBuilder()
-        .setTitle('Wordle Last 7 days Summary')
-        .setColor('#4169e1'); // set the color of the em
-    day7Summary.forEach((row) => {
-      const totalGames = row.games;
-      embed.addFields({name: `${underscore(italic(bold(row.username)))}`,
-        value: `${bold('Games Played')}: ${totalGames}
-      ${bold('Games Lost')}: ${row.gameslost}
-      ${bold('Average Score')}: ${row.average}
-      `});
-    });
-    embed.setDescription(`Wordle 7 day scores.`);
-    if (FOOTER_MESSAGE) {
-      embed.setFooter({text: FOOTER_MESSAGE} );
-    }
     await this.discordWordleChannel.send({embeds: [embed]});
   }
   /**
