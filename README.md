@@ -1,4 +1,5 @@
 # discord-wordle-bot
+[![Build Status](https://github.com/Serk72/discord-wordle-bot/actions/workflows/main.yml/badge.svg)](https://github.com/Serk72/discord-wordle-bot/actions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/Serk72/discord-wordle-bot/blob/main/LICENSE)
 
 Discord bot for monitoring a channel for wordle scores
