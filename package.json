@@ -5,7 +5,13 @@
     "discord.js": "14.11.0",
     "pg": "8.11.1"
   },
+  "devDependencies": {
+    "eslint": "8.44.0",
+    "eslint-config-google": "0.14.0"
+    
+  },
   "scripts": {
-    "start": "node start.js"
+    "start": "node start.js",
+    "lint": "npx eslint --ext .js ."
   }
 }
