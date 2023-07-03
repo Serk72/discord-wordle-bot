@@ -9,7 +9,7 @@ const INSULT_USERNAME = config.get('insultUserName');
 const WORDLE_CHANNEL_ID = config.get('wordleMonitorChannelID');
 const FOOTER_MESSAGE = config.get('footerMessage');
 const WORDLE_REGEX = /Wordle [0-9]* [0-6Xx]\/[0-6]\*?/g;
-
+const USER_TO_NAME_MAP = config.get('userToNameMap');
 /**
  * Main Bot Class to handle events
  */
@@ -137,7 +137,7 @@ class WordleBotClient {
         day7Summary.gamesLost = sum7dayByUser[row.username].gameslost;
       }
       summaryTable.addRow(
-          row.username,
+        USER_TO_NAME_MAP[row.username] || row.username,
           totalGames,
           row.average,
           day7Summary.average);
@@ -145,9 +145,9 @@ class WordleBotClient {
 
     await this.discordWordleChannel.send(`\`\`\`
 ${summaryTable.toString()}\`\`\`
-  ***Overall Leader: ${overallSummary[0].username}***
-  **7 Day Leader: ${day7Summary[0].username}**
-  **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${lastMonthSummary?.[0]?.username}**
+  ***Overall Leader: ${USER_TO_NAME_MAP[overallSummary[0].username] || overallSummary[0].username}***
+  **7 Day Leader: ${USER_TO_NAME_MAP[day7Summary[0].username] || day7Summary[0].username}**
+  **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${USER_TO_NAME_MAP[lastMonthSummary?.[0]?.username] || lastMonthSummary?.[0]?.username}**
 *${FOOTER_MESSAGE ? `${FOOTER_MESSAGE},`: ''} Overall Average=${overallAverage}*`);
   }
   /**

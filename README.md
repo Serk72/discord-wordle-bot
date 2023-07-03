@@ -20,6 +20,7 @@ This application is configured using https://github.com/node-config/node-config 
 | `postgres.host`                | String    | Database host name, no http/https:// |  |
 | `postgres.port`                | Int       | port                          | |
 | `footerMessage`                | String    | If specified, footer that will be sent will all bot messages. |  |
+| `userToNameMap`                | Object    | Map of of string usernames to string display names.
 
 #### Example Config
 ```json
@@ -35,6 +36,9 @@ This application is configured using https://github.com/node-config/node-config 
         "host": "a hostname",
         "port": 5432
     },
+    "userToNameMap": {
+        "a discord username": "A name to map too"
+    }
     "footerMessage": "a footer message"
 }
 ```
