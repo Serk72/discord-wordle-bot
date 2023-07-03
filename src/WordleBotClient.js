@@ -137,7 +137,7 @@ class WordleBotClient {
         day7Summary.gamesLost = sum7dayByUser[row.username].gameslost;
       }
       summaryTable.addRow(
-        USER_TO_NAME_MAP[row.username] || row.username,
+          USER_TO_NAME_MAP[row.username] || row.username,
           totalGames,
           row.average,
           day7Summary.average);
