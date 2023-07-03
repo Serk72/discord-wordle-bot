@@ -20,7 +20,9 @@ This application is configured using https://github.com/node-config/node-config 
 | `postgres.host`                | String    | Database host name, no http/https:// |  |
 | `postgres.port`                | Int       | port                          | |
 | `footerMessage`                | String    | If specified, footer that will be sent will all bot messages. |  |
-| `userToNameMap`                | Object    | Map of of string usernames to string display names.
+| `userToNameMap`                | Object    | Map of of string usernames to string display names. |  |
+| `guildId`                      | String    | Discord server Guild Id, this bot only supports commands set for one Guild (discord server), this id can be found by enabling developer settings and right clicking on the desired server | |
+| `applicationId`                | String    | Application Id for the discord bot, used to register commands to a discord server | | 
 
 #### Example Config
 ```json

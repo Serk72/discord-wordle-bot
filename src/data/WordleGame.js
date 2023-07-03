@@ -6,6 +6,17 @@ const DATABASE_CONFIG = config.get('postgres');
  */
 class WordleGame {
   pool;
+  static _instance;
+  /**
+   * Singleton instance.
+   * @return {WordleGame} the singleton instance
+   */
+  static getInstance() {
+    if (!WordleGame._instance) {
+      WordleGame._instance = new WordleGame();
+    }
+    return WordleGame._instance;
+  }
   /**
    * Constructor
    */

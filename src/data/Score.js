@@ -6,6 +6,17 @@ const DATABASE_CONFIG = config.get('postgres');
  */
 class Score {
   pool;
+  static _instance;
+  /**
+   * Singleton instance.
+   * @return {Score} the singleton instance
+   */
+  static getInstance() {
+    if (!Score._instance) {
+      Score._instance = new Score();
+    }
+    return Score._instance;
+  }
   /**
    * Constructor.
    */

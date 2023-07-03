@@ -1,15 +1,11 @@
 const config = require('config');
-const {EmbedBuilder, bold, italic, underscore} = require('discord.js');
 const {WordleGame} = require('./data/WordleGame');
 const {Score} = require('./data/Score');
-const AsciiTable = require('ascii-table');
 
 
 const INSULT_USERNAME = config.get('insultUserName');
 const WORDLE_CHANNEL_ID = config.get('wordleMonitorChannelID');
-const FOOTER_MESSAGE = config.get('footerMessage');
 const WORDLE_REGEX = /Wordle [0-9]* [0-6Xx]\/[0-6]\*?/g;
-const USER_TO_NAME_MAP = config.get('userToNameMap');
 /**
  * Main Bot Class to handle events
  */
@@ -17,139 +13,19 @@ class WordleBotClient {
   /**
    * Constructor
    * @param {Channel} channel discord channel to send messages too.
+   * @param {MonthlyCommand} monthlyCommand command for monthly summaries
+   * @param {SummaryCommand} summaryCommand command for daily summaries
+   * @param {WhoLeftCommand} whoLeftCommand command for who left messages.
    */
-  constructor(channel) {
-    this.wordleGame = new WordleGame();
-    this.wordleScore = new Score();
+  constructor(channel, monthlyCommand, summaryCommand, whoLeftCommand) {
+    this.wordleGame = WordleGame.getInstance();
+    this.wordleScore = Score.getInstance();
     this.discordWordleChannel = channel;
+    this.monthlyCommand = monthlyCommand;
+    this.summaryCommand = summaryCommand;
+    this.whoLeftCommand = whoLeftCommand;
   }
-  /**
-   * Determines what players have not completed the days wordle and senda a message
-   * indicated players that have not finished yet to the WORDLE_CHANNEL_ID channel.
-   */
-  async _whoIsLeft() {
-    const latestGame = await this.wordleGame.getLatestGame();
-    const totalPlayes = await this.wordleScore.getTotalPlayers();
-    const gamePlayers = await this.wordleScore.getPlayersForGame(latestGame);
-    let embed;
-    if (totalPlayes.length === gamePlayers.length) {
-      embed = new EmbedBuilder()
-          .setTitle(`Everyone is done with ${latestGame}`)
-          .setColor('#4169e1'); // set the color of the em
-      embed.setDescription(`All done.`);
-      if (FOOTER_MESSAGE) {
-        embed.setFooter({text: FOOTER_MESSAGE} );
-      }
-    } else {
-      if (totalPlayes.length - gamePlayers.length === 1) {
-        const remaining = totalPlayes.filter((player) => !gamePlayers.includes(player));
-        if (remaining[0] === INSULT_USERNAME) {
-          embed = new EmbedBuilder()
-              .setTitle(`Once again ${INSULT_USERNAME} is the last one remaining...`)
-              .setColor('#4169e1');
-        } else {
-          embed = new EmbedBuilder()
-              .setTitle('One player Remaining')
-              .setColor('#4169e1');
-        }
-      } else {
-        embed = new EmbedBuilder()
-            .setTitle('People not done')
-            .setColor('#4169e1'); // set the color of the em
-      }
-      totalPlayes.filter((player) => !gamePlayers.includes(player)).forEach((player) => {
-        if (player === INSULT_USERNAME) {
-          const caseyMessages = [
-            `Is too lazy to complete Wordle ${latestGame}`,
-            `Is holding everone else back on Wordle ${latestGame}, he's the worst`,
-            `Is the worst. Complete Wordle ${latestGame} already!`,
-            `Has time to edit discord names but not complete Wordle ${latestGame}`,
-            `As per usual has not completed Wordle ${latestGame}`,
-          ];
-          const randomIndex = Math.floor(Math.random() * 5);
 
-          embed.addFields({name: `${player}`, value: caseyMessages[randomIndex]});
-        } else {
-          embed.addFields({name: `${player}`, value: `Has not completed Wordle ${latestGame}`});
-        }
-      });
-      if (FOOTER_MESSAGE) {
-        embed.setFooter({text: FOOTER_MESSAGE} );
-      }
-    }
-
-
-    await this.discordWordleChannel.send({embeds: [embed]});
-  }
-  /**
-   * Calculates and sends the monthly summary for all plays for last month.
-   */
-  async _sendSQLMonthly() {
-    const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
-
-    const embed = new EmbedBuilder()
-        .setTitle(`Wordle ${lastMonthSummary?.[0]?.lastmonth} Summary`)
-        .setColor('#4169e1'); // set the color of the em
-    lastMonthSummary.forEach((row) => {
-      const totalGames = row.games;
-      embed.addFields({name: `${underscore(italic(bold(row.username)))}`,
-        value: `${bold('Games Played')}: ${totalGames}
-      ${bold('Games Lost')}: ${row.gameslost}
-      ${bold('Average Score')}: ${row.average}
-      `});
-    });
-    embed.setDescription(`Wordle ${lastMonthSummary?.[0]?.lastmonth} Scores`);
-    if (FOOTER_MESSAGE) {
-      embed.setFooter({text: FOOTER_MESSAGE} );
-    }
-    await this.discordWordleChannel.send({embeds: [embed]});
-  }
-  /**
-   * Calculates and sends the overall average summaries for all players in the game.
-   */
-  async _sendSQLSummary() {
-    const overallSummary = await this.wordleScore.getPlayerSummaries();
-    const day7Summary = await this.wordleScore.getLast7DaysSummaries();
-    const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
-    const sum7dayByUser = day7Summary.reduce((acc, sum) => {
-      acc[sum.username] = sum;
-      return acc;
-    }, {});
-    let score = 0;
-    let gamesPlayed = 0;
-    overallSummary.forEach((row) => {
-      score += +row.totalscore;
-      gamesPlayed += +row.games;
-    });
-    const overallAverage = score / gamesPlayed;
-    const summaryTable = new AsciiTable('Wordle Summary');
-    summaryTable.setHeading('User', 'GP', 'AS', '7DA');
-    overallSummary.forEach((row) => {
-      const totalGames = +row.games;
-      const day7Summary = {
-        gamesPlayed: '',
-        average: '',
-        gamesLost: '',
-      };
-      if (sum7dayByUser[row.username]) {
-        day7Summary.gamesPlayed = sum7dayByUser[row.username].games;
-        day7Summary.average = sum7dayByUser[row.username].average;
-        day7Summary.gamesLost = sum7dayByUser[row.username].gameslost;
-      }
-      summaryTable.addRow(
-          USER_TO_NAME_MAP[row.username] || row.username,
-          totalGames,
-          row.average,
-          day7Summary.average);
-    });
-
-    await this.discordWordleChannel.send(`\`\`\`
-${summaryTable.toString()}\`\`\`
-  ***Overall Leader: ${USER_TO_NAME_MAP[overallSummary[0].username] || overallSummary[0].username}***
-  **7 Day Leader: ${USER_TO_NAME_MAP[day7Summary[0].username] || day7Summary[0].username}**
-  **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${USER_TO_NAME_MAP[lastMonthSummary?.[0]?.username] || lastMonthSummary?.[0]?.username}**
-*${FOOTER_MESSAGE ? `${FOOTER_MESSAGE},`: ''} Overall Average=${overallAverage}*`);
-  }
   /**
    * Reads all messages in the discordWordleChannel to find and store all Wordle scores.
    * This method should only be run once when first loading the bot to get all historical scores.
@@ -202,10 +78,10 @@ ${summaryTable.toString()}\`\`\`
     const remaining = totalPlayes.filter((player) => !gamePlayers.includes(player));
     console.log(remaining);
     if (!remaining.length) {
-      await this._sendSQLSummary();
+      await this.summaryCommand.execute();
     } else if (remaining.length === 1) {
       if (remaining[0] === INSULT_USERNAME) {
-        await this._whoIsLeft();
+        await this.whoLeftCommand.execute();
       }
     }
   }
@@ -237,19 +113,19 @@ ${summaryTable.toString()}\`\`\`
     if (message.channelId !== WORDLE_CHANNEL_ID) {
       return;
     }
-    if (message.content.startsWith('!whoLeft') || message.content.startsWith('/whoLeft')) {
+    if (message.content.startsWith('!wholeft') || message.content.startsWith('/wholeft')) {
       message.delete();
-      await this._whoIsLeft();
+      await this.whoLeftCommand.execute();
       return;
     }
     if (message.content.startsWith('!summary') || message.content.startsWith('/summary')) {
       message.delete();
-      await this._sendSQLSummary();
+      await this.summaryCommand.execute();
       return;
     }
     if (message.content.startsWith('!monthly') || message.content.startsWith('/monthly')) {
       message.delete();
-      await this._sendSQLMonthly();
+      await this.monthlyCommand.execute();
       return;
     }
     const found = message?.content?.match(WORDLE_REGEX);
