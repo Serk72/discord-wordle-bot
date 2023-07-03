@@ -29,7 +29,7 @@ class MonthlyCommand {
      */
   async execute(interaction) {
     const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
-    const summaryTable = new AsciiTable(`Wordle ${lastMonthSummary?.[0]?.lastmonth} Summary`);
+    const summaryTable = new AsciiTable(`Wordle ${lastMonthSummary?.[0]?.lastmonth?.trim()} Summary`);
     summaryTable.setHeading('User', 'GP', 'GL', 'AS');
     lastMonthSummary.forEach((row) => {
       summaryTable.addRow(
