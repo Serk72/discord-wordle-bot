@@ -96,6 +96,9 @@ class WordleBotClient {
     console.log(newMessage?.content);
     const found = newMessage?.content?.match(WORDLE_REGEX);
     if (found && found.length) {
+      const wordle = found[0];
+      const subWordle = wordle.substring(wordle.indexOf(' ')+1);
+      const wordleNumber = Number(subWordle.substring(0, subWordle.indexOf(' ')));
       if ((await this.wordleScore.getScore(newMessage.author.username, wordleNumber))) {
         await newMessage.lineReply('I saw that, Edited Wordle Score Ignored.');
       } else {

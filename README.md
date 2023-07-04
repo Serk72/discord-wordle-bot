@@ -1,6 +1,8 @@
 # discord-wordle-bot
 [![Build Status](https://github.com/Serk72/discord-wordle-bot/actions/workflows/main.yml/badge.svg)](https://github.com/Serk72/discord-wordle-bot/actions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/Serk72/discord-wordle-bot/blob/main/LICENSE)
+[![Coverage Status](https://codecov.io/github/Serk72/discord-wordle-bot/branch/main/graph/badge.svg)](https://codecov.io/github/Serk72/discord-wordle-bot)
+[![CodeQL](https://github.com/Serk72/discord-wordle-bot/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Serk72/discord-wordle-bot/actions/workflows/codeql-analysis.yml)
 
 Discord bot for monitoring a channel for wordle scores
 
@@ -40,7 +42,7 @@ This application is configured using https://github.com/node-config/node-config 
     },
     "userToNameMap": {
         "a discord username": "A name to map too"
-    }
+    },
     "footerMessage": "a footer message"
 }
 ```

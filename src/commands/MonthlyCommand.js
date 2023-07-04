@@ -29,6 +29,14 @@ class MonthlyCommand {
      */
   async execute(interaction) {
     const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
+    if (!lastMonthSummary.length) {
+      if (interaction) {
+        await interaction.reply('No Montly data found.');
+      } else {
+        await this.discordWordleChannel.send('No Montly data found.');
+      }
+      return;
+    }
     const summaryTable = new AsciiTable(`Wordle ${lastMonthSummary?.[0]?.lastmonth?.trim()} Summary`);
     summaryTable.setHeading('User', 'GP', 'GL', 'AS');
     lastMonthSummary.forEach((row) => {
