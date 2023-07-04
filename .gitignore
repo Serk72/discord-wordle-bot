@@ -4,3 +4,4 @@ config/*
 release.sh
 persistance.yaml
 node_modules
+coverage
