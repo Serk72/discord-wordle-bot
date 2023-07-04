@@ -28,7 +28,14 @@ class Score {
       password: DATABASE_CONFIG.password,
       port: DATABASE_CONFIG.port,
     });
-    const tablesSQL = 'CREATE TABLE IF NOT EXISTS Score (Id serial PRIMARY KEY, WordleGame INT NOT NULL, UserName VARCHAR (255), UserTag VARCHAR (255), WordleScore VARCHAR (255), Score INT, Date TIMESTAMP);';
+    const tablesSQL = `CREATE TABLE IF NOT EXISTS 
+    Score (
+      Id serial PRIMARY KEY,
+      WordleGame INT NOT NULL,
+      UserName VARCHAR (255),
+      UserTag VARCHAR (255),
+      WordleScore VARCHAR (255),
+      Score INT, Date TIMESTAMP);`;
     this.pool.query(tablesSQL, [], (err, res) => {
       if (err) {
         console.error(err);

@@ -21,12 +21,12 @@ jest.mock('../../src/data/WordleGame', () => {
 });
 const mockedDiscordChannel = {send: jest.fn().mockResolvedValue()};
 describe('WhoLeftCommand Tests', () => {
-  const whoLeftCommand = new WhoLeftCommand(mockedDiscordChannel);
+  const whoLeftCommand = WhoLeftCommand.getInstance();
   beforeEach(() => {
     jest.clearAllMocks();
   });
   test('Everyone done, empty respons Channel', async () => {
-    await whoLeftCommand.execute();
+    await whoLeftCommand.execute(null, mockedDiscordChannel);
     expect(mockedDiscordChannel.send).toBeCalled();
   });
 
@@ -38,19 +38,19 @@ describe('WhoLeftCommand Tests', () => {
 
   test('1 left Channel', async () => {
     Score.getInstance().getTotalPlayers.mockResolvedValueOnce(['test']);
-    await whoLeftCommand.execute();
+    await whoLeftCommand.execute(null, mockedDiscordChannel);
     expect(mockedDiscordChannel.send).toBeCalled();
   });
 
   test('multiple left Channel', async () => {
     Score.getInstance().getTotalPlayers.mockResolvedValueOnce(['test', 'test2']);
-    await whoLeftCommand.execute();
+    await whoLeftCommand.execute(null, mockedDiscordChannel);
     expect(mockedDiscordChannel.send).toBeCalled();
   });
 
   test('insult user left Channel', async () => {
     Score.getInstance().getTotalPlayers.mockResolvedValueOnce(['someUser']);
-    await whoLeftCommand.execute();
+    await whoLeftCommand.execute(null, mockedDiscordChannel);
     expect(mockedDiscordChannel.send).toBeCalled();
   });
 });

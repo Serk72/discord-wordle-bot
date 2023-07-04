@@ -9,14 +9,14 @@ jest.mock('../../src/data/Score', () => {
     },
   });
 });
-const mockedDiscordChannel = {send: jest.fn().mockResolvedValue()};
 describe('MonthlyCommand Tests', () => {
-  const monthlyCommand = new MonthlyCommand(mockedDiscordChannel);
+  const monthlyCommand = MonthlyCommand.getInstance();
   beforeEach(() => {
     jest.clearAllMocks();
   });
   test('test no results Channel', async () => {
-    await monthlyCommand.execute();
+    const mockedDiscordChannel = {send: jest.fn().mockResolvedValue()};
+    await monthlyCommand.execute(null, mockedDiscordChannel);
     expect(mockedDiscordChannel.send).toBeCalledWith('No Montly data found.');
   });
   test('test no results Interaction', async () => {
@@ -52,7 +52,8 @@ describe('MonthlyCommand Tests', () => {
       gameslost: '1',
       average: '7',
     }]);
-    await monthlyCommand.execute();
+    const mockedDiscordChannel = {send: jest.fn().mockResolvedValue()};
+    await monthlyCommand.execute(null, mockedDiscordChannel);
     expect(mockedDiscordChannel.send).toBeCalledWith(`\`\`\`
 .---------------------.
 | Wordle undefined Summary |

@@ -13,7 +13,7 @@ jest.mock('../../src/data/Score', () => {
 });
 const mockedDiscordChannel = {send: jest.fn().mockResolvedValue()};
 describe('SummaryCommand Tests', () => {
-  const summaryCommand = new SummaryCommand(mockedDiscordChannel);
+  const summaryCommand = SummaryCommand.getInstance();
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -58,7 +58,7 @@ describe('SummaryCommand Tests', () => {
       games: '1',
       average: '7',
     }]);
-    await summaryCommand.execute();
+    await summaryCommand.execute(null, mockedDiscordChannel);
     expect(mockedDiscordChannel.send).toBeCalledWith(`\`\`\`
 .----------------------.
 |    Wordle Summary    |

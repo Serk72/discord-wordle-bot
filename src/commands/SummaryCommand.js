@@ -10,24 +10,34 @@ const USER_TO_NAME_MAP = config.get('userToNameMap');
  * Command for dispalying summary table for wordle averages.
  */
 class SummaryCommand {
+  static _instance;
+  /**
+   * Singleton instance.
+   * @return {SummaryCommand} the singleton instance
+   */
+  static getInstance() {
+    if (!SummaryCommand._instance) {
+      SummaryCommand._instance = new SummaryCommand();
+    }
+    return SummaryCommand._instance;
+  }
   static data = new SlashCommandBuilder()
       .setName('summary')
       .setDescription('Displays the current summary (message displated each day)');
     /**
      * Constructor.
-     * @param {*} discordWordleChannel Discord channel to send messages to if not an interaction with a command.
      */
-  constructor(discordWordleChannel) {
+  constructor() {
     this.wordleScore = Score.getInstance();
-    this.discordWordleChannel = discordWordleChannel;
     this.data = SummaryCommand.data;
   }
 
   /**
      * Calculates and sends the overall average summaries for all players in the game.
      * @param {*} interaction discord interaction if specified the command will reply too.
+     * @param {*} discordWordleChannel discord channel to send the command output too, only used if not an interaction.
      */
-  async execute(interaction) {
+  async execute(interaction, discordWordleChannel) {
     const overallSummary = await this.wordleScore.getPlayerSummaries();
     const day7Summary = await this.wordleScore.getLast7DaysSummaries();
     const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
@@ -74,7 +84,7 @@ ${summaryTable.toString()}\`\`\`
     if (interaction) {
       interaction.reply(messageToSend);
     } else {
-      await this.discordWordleChannel.send(messageToSend);
+      await discordWordleChannel.send(messageToSend);
     }
   }
 }

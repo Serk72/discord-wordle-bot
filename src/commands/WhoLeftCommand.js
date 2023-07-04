@@ -10,17 +10,26 @@ const FOOTER_MESSAGE = config.get('footerMessage');
  * indicated players that have not finished yet to the WORDLE_CHANNEL_ID channel.
  */
 class WhoLeftCommand {
+  static _instance;
+  /**
+   * Singleton instance.
+   * @return {WhoLeftCommand} the singleton instance
+   */
+  static getInstance() {
+    if (!WhoLeftCommand._instance) {
+      WhoLeftCommand._instance = new WhoLeftCommand();
+    }
+    return WhoLeftCommand._instance;
+  }
   static data = new SlashCommandBuilder()
       .setName('wholeft')
       .setDescription('Posts who has not completed the current Wordle for the day.');
   /**
    * Constructor.
-   * @param {*} discordWordleChannel Discord channel to send messages to if not an interaction with a command.
    */
-  constructor(discordWordleChannel) {
+  constructor() {
     this.wordleGame = WordleGame.getInstance();
     this.wordleScore = Score.getInstance();
-    this.discordWordleChannel = discordWordleChannel;
     this.data = WhoLeftCommand.data;
   }
 
@@ -28,8 +37,9 @@ class WhoLeftCommand {
    * Determines what players have not completed the days wordle and senda a message
    * indicated players that have not finished yet to the WORDLE_CHANNEL_ID channel.
    * @param {*} interaction discord interaction if specified the command will reply too.
+   * @param {*} discordWordleChannel discord channel to send the command output too, only used if not an interaction.
    */
-  async execute(interaction) {
+  async execute(interaction, discordWordleChannel) {
     const latestGame = await this.wordleGame.getLatestGame();
     const totalPlayes = await this.wordleScore.getTotalPlayers();
     const gamePlayers = await this.wordleScore.getPlayersForGame(latestGame);
@@ -79,7 +89,7 @@ class WhoLeftCommand {
     if (interaction) {
       interaction.reply({embeds: [embed]});
     } else {
-      await this.discordWordleChannel.send({embeds: [embed]});
+      await discordWordleChannel.send({embeds: [embed]});
     }
   }
 }

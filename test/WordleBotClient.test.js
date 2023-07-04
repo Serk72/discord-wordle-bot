@@ -1,5 +1,6 @@
 const {WordleBotClient} = require('../src/WordleBotClient');
 const {Score} = require('../src/data/Score');
+const {MonthlyCommand, SummaryCommand, WhoLeftCommand} = require('../src/commands');
 jest.mock('../src/data/Score', () => {
   return ({
     Score: {
@@ -23,64 +24,85 @@ jest.mock('../src/data/WordleGame', () => {
     },
   });
 });
+jest.mock('../src/commands/MonthlyCommand', () => {
+  return ({
+    getInstance: jest.fn().mockReturnValue({
+      execute: jest.fn().mockResolvedValue(),
+      data: {name: 'monthly'},
+    }),
+  });
+});
+jest.mock('../src/commands/SummaryCommand', () => {
+  return ({
+    getInstance: jest.fn().mockReturnValue({
+      execute: jest.fn().mockResolvedValue(),
+      data: {name: 'summary'},
+    }),
+  });
+});
+jest.mock('../src/commands/WhoLeftCommand', () => {
+  return ({
+    getInstance: jest.fn().mockReturnValue({
+      execute: jest.fn().mockResolvedValue(),
+      data: {name: 'wholeft'},
+    }),
+  });
+});
 const mockedDiscordChannel = {send: jest.fn().mockResolvedValue()};
 describe('WordleBotClient Tests', () => {
-  const monthlyCommand = {execute: jest.fn().mockResolvedValue()};
-  const summaryCommand = {execute: jest.fn().mockResolvedValue()};
-  const whoLeftCommand = {execute: jest.fn().mockResolvedValue()};
-  const wordleBot = new WordleBotClient(mockedDiscordChannel, monthlyCommand, summaryCommand, whoLeftCommand);
+  const wordleBot = new WordleBotClient(mockedDiscordChannel);
   beforeEach(() => {
     jest.clearAllMocks();
   });
   test('Empty Message', async () => {
     await wordleBot.messageHandler({});
-    expect(monthlyCommand.execute).toHaveBeenCalledTimes(0);
-    expect(summaryCommand.execute).toHaveBeenCalledTimes(0);
-    expect(whoLeftCommand.execute).toHaveBeenCalledTimes(0);
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
   test('Empty Message In wordle Channel', async () => {
     await wordleBot.messageHandler({channelId: '1232', content: ''});
-    expect(monthlyCommand.execute).toHaveBeenCalledTimes(0);
-    expect(summaryCommand.execute).toHaveBeenCalledTimes(0);
-    expect(whoLeftCommand.execute).toHaveBeenCalledTimes(0);
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
   test('WhoLeft In wordle Channel', async () => {
     await wordleBot.messageHandler({channelId: '1232', content: '!wholeft', delete: ()=>{}});
-    expect(monthlyCommand.execute).toHaveBeenCalledTimes(0);
-    expect(summaryCommand.execute).toHaveBeenCalledTimes(0);
-    expect(whoLeftCommand.execute).toHaveBeenCalledTimes(1);
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(1);
   });
   test('WhoLeft In wordle Channel', async () => {
     await wordleBot.messageHandler({channelId: '1232', content: '/wholeft', delete: ()=>{}});
-    expect(monthlyCommand.execute).toHaveBeenCalledTimes(0);
-    expect(summaryCommand.execute).toHaveBeenCalledTimes(0);
-    expect(whoLeftCommand.execute).toHaveBeenCalledTimes(1);
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(1);
   });
 
   test('Summary In wordle Channel', async () => {
     await wordleBot.messageHandler({channelId: '1232', content: '!summary', delete: ()=>{}});
-    expect(monthlyCommand.execute).toHaveBeenCalledTimes(0);
-    expect(summaryCommand.execute).toHaveBeenCalledTimes(1);
-    expect(whoLeftCommand.execute).toHaveBeenCalledTimes(0);
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(1);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
   test('Summary In wordle Channel', async () => {
     await wordleBot.messageHandler({channelId: '1232', content: '/summary', delete: ()=>{}});
-    expect(monthlyCommand.execute).toHaveBeenCalledTimes(0);
-    expect(summaryCommand.execute).toHaveBeenCalledTimes(1);
-    expect(whoLeftCommand.execute).toHaveBeenCalledTimes(0);
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(1);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
 
   test('Monthly In wordle Channel', async () => {
     await wordleBot.messageHandler({channelId: '1232', content: '!monthly', delete: ()=>{}});
-    expect(monthlyCommand.execute).toHaveBeenCalledTimes(1);
-    expect(summaryCommand.execute).toHaveBeenCalledTimes(0);
-    expect(whoLeftCommand.execute).toHaveBeenCalledTimes(0);
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(1);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
   test('Monthly In wordle Channel', async () => {
     await wordleBot.messageHandler({channelId: '1232', content: '/monthly', delete: ()=>{}});
-    expect(monthlyCommand.execute).toHaveBeenCalledTimes(1);
-    expect(summaryCommand.execute).toHaveBeenCalledTimes(0);
-    expect(whoLeftCommand.execute).toHaveBeenCalledTimes(0);
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(1);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
 
   test('Wordle Score', async () => {
@@ -88,10 +110,22 @@ describe('WordleBotClient Tests', () => {
 
 🟨⬛🟨🟨⬛
 🟩🟩🟩🟩🟩`, delete: ()=>{}});
-    expect(monthlyCommand.execute).toHaveBeenCalledTimes(0);
-    expect(summaryCommand.execute).toHaveBeenCalledTimes(1);
-    expect(whoLeftCommand.execute).toHaveBeenCalledTimes(0);
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(1);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
+
+  test('Wordle Score Insult username left', async () => {
+    Score.getInstance().getTotalPlayers.mockResolvedValueOnce(['someUser']);
+    await wordleBot.messageHandler({author: {username: 'test'}, channelId: '1232', content: `Wordle 745 2/6*
+
+🟨⬛🟨🟨⬛
+🟩🟩🟩🟩🟩`, delete: ()=>{}});
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(1);
+  });
+
 
   test('Edit Event', async () => {
     await wordleBot.editEvent({channelId: '1232', content: '/monthly', delete: ()=>{}}, {channelId: '1232', content: '/monthly', delete: ()=>{}});

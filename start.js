@@ -10,19 +10,13 @@ const rest = new REST({version: '10'}).setToken(config.get('discordBotToken'));
 client.on(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}`);
   console.log(`Connected to ${client.guilds.cache.size} guilds`);
-  const monthlyCommand = new commands.MonthlyCommand(client.channels.cache.get(WORDLE_CHANNEL_ID));
-  const summaryCommand = new commands.SummaryCommand(client.channels.cache.get(WORDLE_CHANNEL_ID));
-  const whoLeftCommand = new commands.WhoLeftCommand(client.channels.cache.get(WORDLE_CHANNEL_ID));
-  const botClient = new WordleBotClient(client.channels.cache.get(WORDLE_CHANNEL_ID),
-      monthlyCommand,
-      summaryCommand,
-      whoLeftCommand);
+  const botClient = new WordleBotClient(client.channels.cache.get(WORDLE_CHANNEL_ID));
 
   client.on(Events.MessageUpdate, botClient.editEvent.bind(botClient));
   client.on(Events.MessageCreate, botClient.messageHandler.bind(botClient));
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
-    const exeCommand = [monthlyCommand, summaryCommand, whoLeftCommand].find((command) => command.data.name === interaction.commandName);
+    const exeCommand = Object.keys(commands).map((command) => commands[command].getInstance()).find((command) => command.data.name === interaction.commandName);
     if (!exeCommand) {
       console.error(`No command matching ${interaction.commandName} was found.`);
       return;

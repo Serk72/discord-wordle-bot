@@ -10,30 +10,40 @@ const FOOTER_MESSAGE = config.get('footerMessage');
  * Command for displaying last month averages.
  */
 class MonthlyCommand {
+  static _instance;
+  /**
+   * Singleton instance.
+   * @return {MonthlyCommand} the singleton instance
+   */
+  static getInstance() {
+    if (!MonthlyCommand._instance) {
+      MonthlyCommand._instance = new MonthlyCommand();
+    }
+    return MonthlyCommand._instance;
+  }
   static data = new SlashCommandBuilder()
       .setName('monthly')
       .setDescription('Displays last months wordle summary.');
     /**
      * Constructor.
-     * @param {*} discordWordleChannel Discord channel to send messages to if not an interaction with a command.
      */
-  constructor(discordWordleChannel) {
+  constructor() {
     this.wordleScore = Score.getInstance();
-    this.discordWordleChannel = discordWordleChannel;
     this.data = MonthlyCommand.data;
   }
 
   /**
      * Calculates and sends the monthly summary for all plays for last month.
      * @param {*} interaction discord interaction if specified the command will reply too.
+     * @param {*} discordWordleChannel discord channel to send the command output too, only used if not an interaction.
      */
-  async execute(interaction) {
+  async execute(interaction, discordWordleChannel) {
     const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
     if (!lastMonthSummary.length) {
       if (interaction) {
         await interaction.reply('No Montly data found.');
       } else {
-        await this.discordWordleChannel.send('No Montly data found.');
+        await discordWordleChannel.send('No Montly data found.');
       }
       return;
     }
@@ -54,7 +64,7 @@ ${summaryTable.toString()}\`\`\`
     if (interaction) {
       await interaction.reply(messageToSend);
     } else {
-      await this.discordWordleChannel.send(messageToSend);
+      await discordWordleChannel.send(messageToSend);
     }
   }
 }
