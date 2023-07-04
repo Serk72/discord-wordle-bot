@@ -17,7 +17,7 @@ This application is configured using https://github.com/node-config/node-config 
 | `discordBotToken`              | String    | Bot token from discord giving the bot access to discord apis. |  |
 | `postgres`                     | Object    | Database connection Info |  | 
 | `postgres.password`            | String    | Password for the database   |  |
-| `postgres.database`            | String    | Database name                  | ` |
+| `postgres.database`            | String    | Database name                  |  |
 | `postgres.user`                | String    | Database user  | |
 | `postgres.host`                | String    | Database host name, no http/https:// |  |
 | `postgres.port`                | Int       | port                          | |
