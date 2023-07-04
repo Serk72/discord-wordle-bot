@@ -1,5 +1,6 @@
 config/*
 !config/default.js
+!config/test.js
 release.sh
 persistance.yaml
 node_modules
