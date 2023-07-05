@@ -48,10 +48,10 @@ class WordleBotClient {
     const remaining = totalPlayes.filter((player) => !gamePlayers.includes(player));
     console.log(remaining);
     if (!remaining.length) {
-      await this.summaryCommand.execute();
+      await this.summaryCommand.execute(null, this.discordWordleChannel);
     } else if (remaining.length === 1) {
       if (remaining[0] === INSULT_USERNAME) {
-        await this.whoLeftCommand.execute();
+        await this.whoLeftCommand.execute(null, this.discordWordleChannel);
       }
     }
   }
