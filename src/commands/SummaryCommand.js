@@ -1,5 +1,7 @@
 const {SlashCommandBuilder} = require('discord.js');
 const {Score} = require('../data/Score');
+const fetch = require('node-fetch');
+const {WordleGame} = require('../data/WordleGame');
 const AsciiTable = require('ascii-table');
 const config = require('config');
 
@@ -29,6 +31,7 @@ class SummaryCommand {
      */
   constructor() {
     this.wordleScore = Score.getInstance();
+    this.wordleGame = WordleGame.getInstance();
     this.data = SummaryCommand.data;
   }
 
@@ -41,17 +44,13 @@ class SummaryCommand {
     const overallSummary = await this.wordleScore.getPlayerSummaries();
     const day7Summary = await this.wordleScore.getLast7DaysSummaries();
     const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
+    const latestGameNumber = await this.wordleGame.getLatestGame();
+    const latestGame = await this.wordleGame.getWordleGame(latestGameNumber);
+    const latestScores = await this.wordleScore.getGameScores(latestGameNumber);
     const sum7dayByUser = day7Summary.reduce((acc, sum) => {
       acc[sum.username] = sum;
       return acc;
     }, {});
-    let score = 0;
-    let gamesPlayed = 0;
-    overallSummary.forEach((row) => {
-      score += +row.totalscore;
-      gamesPlayed += +row.games;
-    });
-    const overallAverage = score / gamesPlayed;
     const summaryTable = new AsciiTable('Wordle Summary');
     summaryTable.setHeading('User', 'GP', 'AS', '7DA');
     overallSummary.forEach((row) => {
@@ -73,14 +72,29 @@ class SummaryCommand {
           day7Summary.average);
     });
 
-    const messageToSend = `\`\`\`
+    let messageToSend = `\`\`\`
 ${summaryTable.toString()}\`\`\`
     ***Overall Leader: ${USER_TO_NAME_MAP[overallSummary[0].username] || overallSummary[0].username}***
     **7 Day Leader: ${USER_TO_NAME_MAP[day7Summary[0].username] || day7Summary[0].username}**
     **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${USER_TO_NAME_MAP[lastMonthSummary?.[0]?.username] || lastMonthSummary?.[0]?.username}**
-    *Overall Average=${overallAverage}*
+    **Today's Winner: ${USER_TO_NAME_MAP[latestScores?.[0]?.username] || latestScores?.[0]?.username}**
     ${FOOTER_MESSAGE ? `*${FOOTER_MESSAGE}*`: ''}`;
+    if (latestGame?.word && latestGame?.word?.trim() !== '') {
+      const giphyApiKey = config.get('giphyApiKey');
+      if (giphyApiKey) {
+        const url = `http://api.giphy.com/v1/gifs/search?api_key=${giphyApiKey}&q=${latestGame?.word}&limit=1`;
+        const response = await fetch(url, {method: 'Get'})
+            .then((res) => res?.json())
+            .catch((ex) => {
+              console.error(ex);
+              return null;
+            });
 
+        if (response?.data?.[0]?.url) {
+          messageToSend = `${messageToSend}\n${response?.data?.[0]?.url}`;
+        }
+      }
+    }
     if (interaction) {
       interaction.reply(messageToSend);
     } else {

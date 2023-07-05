@@ -1,5 +1,19 @@
 const SummaryCommand = require('../../src/commands/SummaryCommand');
 const {Score} = require('../../src/data/Score');
+jest.mock('node-fetch', () => {
+  return () => Promise.resolve();
+});
+jest.mock('../../src/data/WordleGame', () => {
+  return ({
+    WordleGame: {
+      getInstance: jest.fn().mockReturnValue({
+        getWordleGame: jest.fn().mockResolvedValue(),
+        createWordleGame: jest.fn().mockResolvedValue(),
+        getLatestGame: jest.fn().mockResolvedValue(1),
+      }),
+    },
+  });
+});
 jest.mock('../../src/data/Score', () => {
   return ({
     Score: {
@@ -7,6 +21,7 @@ jest.mock('../../src/data/Score', () => {
         getPlayerSummaries: jest.fn().mockResolvedValue([]),
         getLast7DaysSummaries: jest.fn().mockResolvedValue([]),
         getLastMonthSummaries: jest.fn().mockResolvedValue([]),
+        getGameScores: jest.fn().mockResolvedValue([]),
       }),
     },
   });
@@ -42,7 +57,7 @@ describe('SummaryCommand Tests', () => {
     ***Overall Leader: test***
     **7 Day Leader: test**
     **undefined Winner: undefined**
-    *Overall Average=7*
+    **Today's Winner: undefined**
     *Brought to you by ...*`);
   });
 
@@ -70,7 +85,7 @@ describe('SummaryCommand Tests', () => {
     ***Overall Leader: test***
     **7 Day Leader: test**
     **undefined Winner: undefined**
-    *Overall Average=7*
+    **Today's Winner: undefined**
     *Brought to you by ...*`);
   });
 });

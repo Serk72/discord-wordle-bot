@@ -111,6 +111,16 @@ class Score {
   }
 
   /**
+   * Gets all the usernames and scores for a game.
+   * @param {*} wordleGame wordle game number to check.
+   * @return {*} list of all usernames and scores in order.
+   */
+  async getGameScores(wordleGame) {
+    const results = await this.pool.query('SELECT UserName, Score FROM Score WHERE wordlegame = $1 ORDER By Score', [wordleGame]);
+    return results?.rows;
+  }
+
+  /**
    * Gets overall summary data for all users.
    * @return {*} overall summary data for all users.
    */
