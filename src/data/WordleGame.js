@@ -78,5 +78,22 @@ class WordleGame {
   async createWordleGame(wordleGame, timestamp) {
     await this.pool.query(`INSERT INTO WordleGame(WordleGame, Date) VALUES ($1, to_timestamp($2))`, [wordleGame, timestamp / 1000]);
   }
+
+  /**
+   * Gets all wordle game dates.
+   */
+  async getWordleGames() {
+    const results = await this.pool.query(`SELECT to_char(date, 'yyyy-MM-dd') as day FROM WordleGame`, []);
+    return results.rows;
+  }
+
+  /**
+   * Adds the solution to the wordle game.
+   * @param {*} game wordle Game number.
+   * @param {*} word solution to the wordle.
+   */
+  async addWord(game, word) {
+    await this.pool.query(`UPDATE WordleGame SET word = $1 WHERE wordlegame = $2`, [word, game]);
+  }
 }
 module.exports = {WordleGame};

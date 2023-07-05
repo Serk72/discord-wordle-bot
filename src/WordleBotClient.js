@@ -1,4 +1,6 @@
 const config = require('config');
+const dayjs = require('dayjs');
+const fetch = require('node-fetch');
 const {WordleGame} = require('./data/WordleGame');
 const {Score} = require('./data/Score');
 const {MonthlyCommand, SummaryCommand, WhoLeftCommand} = require('./commands');
@@ -52,6 +54,21 @@ class WordleBotClient {
     } else if (remaining.length === 1) {
       if (remaining[0] === INSULT_USERNAME) {
         await this.whoLeftCommand.execute(null, this.discordWordleChannel);
+      }
+    }
+
+    const currentGame = await this.wordleGame.getWordleGame(latestGame);
+    if (!currentGame?.word || currentGame.word.trim() === '') {
+      const day = dayjs().format('YYYY-MM-DD');
+      const url = `https://www.nytimes.com/svc/wordle/v2/${day}.json`;
+      const solution = await fetch(url, {method: 'Get'})
+          .then((res) => res?.json())
+          .catch((ex) => {
+            console.error(ex);
+            return null;
+          });
+      if (solution) {
+        await this.wordleGame.addWord(solution.days_since_launch, solution.solution);
       }
     }
   }

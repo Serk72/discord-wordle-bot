@@ -1,6 +1,9 @@
 const {WordleBotClient} = require('../src/WordleBotClient');
 const {Score} = require('../src/data/Score');
 const {MonthlyCommand, SummaryCommand, WhoLeftCommand} = require('../src/commands');
+jest.mock('node-fetch', () => {
+  return () => Promise.resolve();
+});
 jest.mock('../src/data/Score', () => {
   return ({
     Score: {
