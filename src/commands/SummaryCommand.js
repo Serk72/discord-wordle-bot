@@ -92,6 +92,9 @@ ${summaryTable.toString()}\`\`\`
 
         if (response?.data?.[0]?.url) {
           messageToSend = `${messageToSend}\n${response?.data?.[0]?.url}`;
+        } else {
+          console.error('Giphy Invalid Response.');
+          console.error(response);
         }
       }
     }

@@ -1,8 +1,12 @@
 const {WordleBotClient} = require('../src/WordleBotClient');
 const {Score} = require('../src/data/Score');
 const {MonthlyCommand, SummaryCommand, WhoLeftCommand} = require('../src/commands');
+const fetch = require('node-fetch');
+
+jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'log').mockImplementation(() => {});
 jest.mock('node-fetch', () => {
-  return () => Promise.resolve();
+  return jest.fn().mockResolvedValue({json: () => ({})});
 });
 jest.mock('../src/data/Score', () => {
   return ({
@@ -23,6 +27,7 @@ jest.mock('../src/data/WordleGame', () => {
         getWordleGame: jest.fn().mockResolvedValue(),
         createWordleGame: jest.fn().mockResolvedValue(),
         getLatestGame: jest.fn().mockResolvedValue(1),
+        addWord: jest.fn().mockResolvedValue(),
       }),
     },
   });
@@ -109,6 +114,17 @@ describe('WordleBotClient Tests', () => {
   });
 
   test('Wordle Score', async () => {
+    await wordleBot.messageHandler({author: {username: 'test'}, channelId: '1232', content: `Wordle 745 2/6*
+
+🟨⬛🟨🟨⬛
+🟩🟩🟩🟩🟩`, delete: ()=>{}});
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(1);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+  });
+
+  test('Wordle Score invalid solution response', async () => {
+    fetch.mockResolvedValueOnce(new Error());
     await wordleBot.messageHandler({author: {username: 'test'}, channelId: '1232', content: `Wordle 745 2/6*
 
 🟨⬛🟨🟨⬛

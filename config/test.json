@@ -2,6 +2,7 @@
     "wordleMonitorChannelID": "1232",
     "insultUserName": "someUser",
     "discordBotToken": "dfhslkdf",
+    "giphyApiKey": "someAPIKEY",
     "userToNameMap": {
         "someUser": "Name"
     },

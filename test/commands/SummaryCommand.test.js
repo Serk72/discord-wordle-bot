@@ -1,7 +1,11 @@
 const SummaryCommand = require('../../src/commands/SummaryCommand');
 const {Score} = require('../../src/data/Score');
+const {WordleGame} = require('../../src/data/WordleGame');
+const fetch = require('node-fetch');
+jest.spyOn(console, 'error').mockImplementation(() => {});
+
 jest.mock('node-fetch', () => {
-  return () => Promise.resolve();
+  return jest.fn().mockResolvedValue({json: () => ({data: [{url: 'someUrl'}]})});
 });
 jest.mock('../../src/data/WordleGame', () => {
   return ({
@@ -73,6 +77,69 @@ describe('SummaryCommand Tests', () => {
       games: '1',
       average: '7',
     }]);
+    await summaryCommand.execute(null, mockedDiscordChannel);
+    expect(mockedDiscordChannel.send).toBeCalledWith(`\`\`\`
+.----------------------.
+|    Wordle Summary    |
+|----------------------|
+| User | GP | AS | 7DA |
+|------|----|----|-----|
+| test |  1 | 7  | 7   |
+'----------------------'\`\`\`
+    ***Overall Leader: test***
+    **7 Day Leader: test**
+    **undefined Winner: undefined**
+    **Today's Winner: undefined**
+    *Brought to you by ...*`);
+  });
+
+  test('summary with results Channel with giphy link', async () => {
+    Score.getInstance().getPlayerSummaries.mockResolvedValueOnce( [{
+      username: 'test',
+      games: '1',
+      average: '7',
+      totalscore: '7',
+    }]);
+    Score.getInstance().getLast7DaysSummaries.mockResolvedValueOnce( [{
+      username: 'test',
+      games: '1',
+      average: '7',
+    }]);
+    WordleGame.getInstance().getWordleGame.mockResolvedValueOnce( {
+      word: 'tests',
+    });
+    await summaryCommand.execute(null, mockedDiscordChannel);
+    expect(mockedDiscordChannel.send).toBeCalledWith(`\`\`\`
+.----------------------.
+|    Wordle Summary    |
+|----------------------|
+| User | GP | AS | 7DA |
+|------|----|----|-----|
+| test |  1 | 7  | 7   |
+'----------------------'\`\`\`
+    ***Overall Leader: test***
+    **7 Day Leader: test**
+    **undefined Winner: undefined**
+    **Today's Winner: undefined**
+    *Brought to you by ...*
+someUrl`);
+  });
+  test('summary with results Channel with giphy link error', async () => {
+    fetch.mockResolvedValueOnce(new Error());
+    Score.getInstance().getPlayerSummaries.mockResolvedValueOnce( [{
+      username: 'test',
+      games: '1',
+      average: '7',
+      totalscore: '7',
+    }]);
+    Score.getInstance().getLast7DaysSummaries.mockResolvedValueOnce( [{
+      username: 'test',
+      games: '1',
+      average: '7',
+    }]);
+    WordleGame.getInstance().getWordleGame.mockResolvedValueOnce( {
+      word: 'tests',
+    });
     await summaryCommand.execute(null, mockedDiscordChannel);
     expect(mockedDiscordChannel.send).toBeCalledWith(`\`\`\`
 .----------------------.
