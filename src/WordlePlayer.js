@@ -46,7 +46,7 @@ class WordlePlayer {
       if (i === 1 && firstWord) {
         guess = firstWord;
       } else {
-        guess = await this.wordleWord.getRandomWord(containingLetters, possibleLetters[0], possibleLetters[1], possibleLetters[2], possibleLetters[3], possibleLetters[4]);
+        guess = await this.wordleWord.getRandomWord(containingLetters, possibleLetters[0], possibleLetters[1], possibleLetters[2], possibleLetters[3], possibleLetters[4], i >= 6, wordleGameNumber);
       }
 
       if (!guess) {

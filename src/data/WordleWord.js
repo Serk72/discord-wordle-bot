@@ -60,13 +60,26 @@ class WordleWord {
    * @param {*} third array of characters in the third position
    * @param {*} fourth array of characters in the fourth position
    * @param {*} fifth array of characters in the fifth position
+   * @param {*} isLastGuess boolean indicating if this is the last guess in the game, meaning duplicate chars should no longer be checked for.
+   * @param {*} wordleGameNumber the wordle game number being played.
    */
-  async getRandomWord(containingLetters, first, second, third, fourth, fifth) {
+  async getRandomWord(containingLetters, first, second, third, fourth, fifth, isLastGuess, wordleGameNumber) {
     const regex = `^[${first.join('')}][${second.join('')}][${third.join('')}][${fourth.join('')}][${fifth.join('')}]$`;
-    const result = await this.pool.query(`
+    let result;
+    if (!isLastGuess) {
+      result = await this.pool.query(`
     SELECT Word from WordleWord Where Word ~ $1 
     ${containingLetters.map((letter) => `AND Word ~ '${letter}'`).join(' ')}
-    ORDER BY random()`, [regex]);
+    AND Word !~ '(.).*\\1'
+    AND Word Not IN (SELECT Word FROM WordleGame WHERE WordleGame != $2)
+    ORDER BY random()`, [regex, wordleGameNumber]);
+    }
+    if (!result?.rows?.[0]?.word) {
+      result = await this.pool.query(`
+      SELECT Word from WordleWord Where Word ~ $1 
+      ${containingLetters.map((letter) => `AND Word ~ '${letter}'`).join(' ')}
+      ORDER BY random()`, [regex]);
+    }
     return result?.rows?.[0]?.word;
   }
 }
