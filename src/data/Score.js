@@ -116,7 +116,7 @@ class Score {
    * @return {*} list of all usernames and scores in order.
    */
   async getGameScores(wordleGame) {
-    const results = await this.pool.query('SELECT UserName, Score FROM Score WHERE wordlegame = $1 ORDER By Score', [wordleGame]);
+    const results = await this.pool.query('SELECT UserName, Score FROM Score WHERE wordlegame = $1 ORDER By Score, Date', [wordleGame]);
     return results?.rows;
   }
 

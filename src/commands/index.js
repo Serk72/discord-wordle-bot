@@ -3,4 +3,5 @@ module.exports = {
   SummaryCommand: require('./SummaryCommand'),
   WhoLeftCommand: require('./WhoLeftCommand'),
   ReprocessCommand: require('./ReprocessCommand'),
+  PlayWordleCommand: require('./PlayWordleCommand'),
 };

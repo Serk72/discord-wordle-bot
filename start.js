@@ -1,5 +1,6 @@
 const {Client, GatewayIntentBits, Events, Routes, REST} = require('discord.js');
 const {WordleBotClient} = require('./src/WordleBotClient');
+
 const client = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent]});
 const config = require('config');
 const commands = require('./src/commands');
