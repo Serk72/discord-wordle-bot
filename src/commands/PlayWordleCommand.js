@@ -39,7 +39,10 @@ class PlayWordleCommand {
    * @param {*} discordWordleChannel discord channel to send the command output too, only used if not an interaction.
    */
   async execute(interaction, discordWordleChannel) {
-    let gameNumber = interaction.options.getInteger('wordle_game');
+    let gameNumber;
+    if (interaction) {
+      gameNumber = interaction.options.getInteger('wordle_game');
+    }
     if (!gameNumber) {
       gameNumber = await this.wordleGame.getLatestGame();
     }

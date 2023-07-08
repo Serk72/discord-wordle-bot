@@ -8,6 +8,15 @@ jest.spyOn(console, 'log').mockImplementation(() => {});
 jest.mock('node-fetch', () => {
   return jest.fn().mockResolvedValue({json: () => ({})});
 });
+jest.mock('../src/data/WordleWord', () => {
+  return ({
+    WordleWord: {
+      getInstance: jest.fn().mockReturnValue({
+        getRandomWord: jest.fn().mockResolvedValue('swear'),
+      }),
+    },
+  });
+});
 jest.mock('../src/data/Score', () => {
   return ({
     Score: {

@@ -24,7 +24,9 @@ This application is configured using https://github.com/node-config/node-config 
 | `footerMessage`                | String    | If specified, footer that will be sent will all bot messages. |  |
 | `userToNameMap`                | Object    | Map of of string usernames to string display names. |  |
 | `guildId`                      | String    | Discord server Guild Id, this bot only supports commands set for one Guild (discord server), this id can be found by enabling developer settings and right clicking on the desired server | |
-| `applicationId`                | String    | Application Id for the discord bot, used to register commands to a discord server | | 
+| `applicationId`                | String    | Application Id for the discord bot, used to register commands to a discord server | |
+| `giphyApiKey`                  | String/`false` | API key for giphy. used to post a gif related to the wordle word for the summary. Specify as `false` to have no gif posted | |
+| `wordleFirstWord`              | String/`false` | word to use as the first guess for wordle. if `false` a random first word will be used | `false` |
 
 #### Example Config
 ```json
