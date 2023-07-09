@@ -35,7 +35,7 @@ jest.mock('../src/data/WordleGame', () => {
       getInstance: jest.fn().mockReturnValue({
         getWordleGame: jest.fn().mockResolvedValue(),
         createWordleGame: jest.fn().mockResolvedValue(),
-        getLatestGame: jest.fn().mockResolvedValue(1),
+        getLatestGame: jest.fn().mockResolvedValue(745),
         addWord: jest.fn().mockResolvedValue(),
       }),
     },
@@ -129,6 +129,17 @@ describe('WordleBotClient Tests', () => {
 🟩🟩🟩🟩🟩`, delete: ()=>{}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(1);
+    expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+  });
+
+  test('Wordle Score not new', async () => {
+    Score.getInstance().getScore.mockResolvedValueOnce({});
+    await wordleBot.messageHandler({author: {username: 'test'}, channelId: '1232', content: `Wordle 745 2/6*
+
+🟨⬛🟨🟨⬛
+🟩🟩🟩🟩🟩`, delete: ()=>{}});
+    expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
+    expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
 

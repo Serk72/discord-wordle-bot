@@ -39,21 +39,26 @@ class WordleBotClient {
     if (!(await this.wordleGame.getWordleGame(wordleNumber))) {
       await this.wordleGame.createWordleGame(wordleNumber, message.createdTimestamp);
     }
-
+    let newPlay = true;
     if (!(await this.wordleScore.getScore(message.author.username, wordleNumber))) {
       await this.wordleScore.createScore(message.author.username, message.author.tag, wordle, wordleNumber, message.createdTimestamp);
+    } else {
+      newPlay = false;
     }
 
     const latestGame = await this.wordleGame.getLatestGame();
-    const totalPlayes = await this.wordleScore.getTotalPlayers();
-    const gamePlayers = await this.wordleScore.getPlayersForGame(latestGame);
-    const remaining = totalPlayes.filter((player) => !gamePlayers.includes(player));
-    console.log(remaining);
-    if (!remaining.length) {
-      await this.summaryCommand.execute(null, this.discordWordleChannel);
-    } else if (remaining.length === 1) {
-      if (remaining[0] === INSULT_USERNAME) {
-        await this.whoLeftCommand.execute(null, this.discordWordleChannel);
+    // Only post additional messages if game played was for the latest game.
+    if (wordleNumber === Number(latestGame) && newPlay) {
+      const totalPlayes = await this.wordleScore.getTotalPlayers();
+      const gamePlayers = await this.wordleScore.getPlayersForGame(latestGame);
+      const remaining = totalPlayes.filter((player) => !gamePlayers.includes(player));
+      console.log(remaining);
+      if (!remaining.length) {
+        await this.summaryCommand.execute(null, this.discordWordleChannel);
+      } else if (remaining.length === 1) {
+        if (remaining[0] === INSULT_USERNAME) {
+          await this.whoLeftCommand.execute(null, this.discordWordleChannel);
+        }
       }
     }
 
