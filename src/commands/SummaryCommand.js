@@ -41,12 +41,24 @@ class SummaryCommand {
      * @param {*} discordWordleChannel discord channel to send the command output too, only used if not an interaction.
      */
   async execute(interaction, discordWordleChannel) {
-    const overallSummary = await this.wordleScore.getPlayerSummaries();
-    const day7Summary = await this.wordleScore.getLast7DaysSummaries();
-    const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
+    let guildId;
+    let channelId;
+    if (interaction) {
+      guildId = interaction.guildId;
+      channelId = interaction.channelId;
+    } else if (discordWordleChannel) {
+      guildId = discordWordleChannel.guildId;
+      channelId = discordWordleChannel.id;
+    } else {
+      console.error('invalid Summary command call. no interaction or channel');
+      throw new Error('Invalid Summary call');
+    }
+    const overallSummary = await this.wordleScore.getPlayerSummaries(guildId, channelId);
+    const day7Summary = await this.wordleScore.getLast7DaysSummaries(guildId, channelId);
+    const lastMonthSummary = await this.wordleScore.getLastMonthSummaries(guildId, channelId);
     const latestGameNumber = await this.wordleGame.getLatestGame();
     const latestGame = await this.wordleGame.getWordleGame(latestGameNumber);
-    const latestScores = await this.wordleScore.getGameScores(latestGameNumber);
+    const latestScores = await this.wordleScore.getGameScores(latestGameNumber, guildId, channelId);
     const sum7dayByUser = day7Summary.reduce((acc, sum) => {
       acc[sum.username] = sum;
       return acc;
@@ -74,8 +86,8 @@ class SummaryCommand {
 
     let messageToSend = `\`\`\`
 ${summaryTable.toString()}\`\`\`
-    ***Overall Leader: ${USER_TO_NAME_MAP[overallSummary[0].username] || overallSummary[0].username}***
-    **7 Day Leader: ${USER_TO_NAME_MAP[day7Summary[0].username] || day7Summary[0].username}**
+    ***Overall Leader: ${USER_TO_NAME_MAP[overallSummary?.[0]?.username] || overallSummary?.[0]?.username}***
+    **7 Day Leader: ${USER_TO_NAME_MAP[day7Summary?.[0]?.username] || day7Summary?.[0]?.username}**
     **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${USER_TO_NAME_MAP[lastMonthSummary?.[0]?.username] || lastMonthSummary?.[0]?.username}**
     **Today's Winner: ${USER_TO_NAME_MAP[latestScores?.[0]?.username] || latestScores?.[0]?.username}**
     ${FOOTER_MESSAGE ? `*${FOOTER_MESSAGE}*`: ''}`;

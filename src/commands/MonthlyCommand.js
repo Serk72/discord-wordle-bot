@@ -38,7 +38,19 @@ class MonthlyCommand {
      * @param {*} discordWordleChannel discord channel to send the command output too, only used if not an interaction.
      */
   async execute(interaction, discordWordleChannel) {
-    const lastMonthSummary = await this.wordleScore.getLastMonthSummaries();
+    let guildId;
+    let channelId;
+    if (interaction) {
+      guildId = interaction.guildId;
+      channelId = interaction.channelId;
+    } else if (discordWordleChannel) {
+      guildId = discordWordleChannel.guildId;
+      channelId = discordWordleChannel.id;
+    } else {
+      console.error('invalid monthly command call. no interaction or channel');
+      throw new Error('Invalid monthly call');
+    }
+    const lastMonthSummary = await this.wordleScore.getLastMonthSummaries(guildId, channelId);
     if (!lastMonthSummary.length) {
       if (interaction) {
         await interaction.reply('No Montly data found.');

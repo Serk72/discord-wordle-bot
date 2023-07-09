@@ -1,6 +1,7 @@
 const ReprocessCommand = require('../../src/commands/ReprocessCommand');
 const {Collection} = require('discord.js');
 
+jest.spyOn(console, 'error').mockImplementation(() => {});
 jest.mock('../../src/data/Score', () => {
   return ({
     Score: {
@@ -30,47 +31,32 @@ describe('ReprocessCommand Tests', () => {
     jest.clearAllMocks();
   });
 
-  test('Reprocess on unsupported channel', async () => {
-    const mockedInteraction = {
-      channelId: 'wrongId',
-      reply: jest.fn().mockResolvedValue(),
-      channel: {
-        messages: {
-          fetch: jest.fn().mockResolvedValue([]),
-        },
-        send: jest.fn().mockResolvedValue(),
-      },
-    };
-    await reprocessCommand.execute(mockedInteraction);
-    expect(mockedInteraction.reply).toBeCalledWith('Reprocessing Only supported for the configured Wordle Channel.');
-  });
-
   test('Reprocess with no messages', async () => {
     const mockedInteraction = {
       channelId: '1232',
-      reply: jest.fn().mockResolvedValue(),
+      deferReply: jest.fn().mockResolvedValue(),
+      followUp: jest.fn().mockResolvedValue(),
       channel: {
         messages: {
           fetch: jest.fn().mockResolvedValue(new Collection()),
         },
-        send: jest.fn().mockResolvedValue(),
       },
     };
     await reprocessCommand.execute(mockedInteraction);
-    expect(mockedInteraction.reply).toBeCalledWith('Starting Reprocess... Existing scores will not be altered.');
-    expect(mockedInteraction.channel.send).toBeCalled();
+    expect(mockedInteraction.deferReply).toBeCalledWith({content: 'Starting Reprocess... Existing scores will not be altered.', ephemeral: true});
+    expect(mockedInteraction.followUp).toBeCalled();
     expect(mockedInteraction.channel.messages.fetch).toHaveBeenCalledTimes(1);
   });
 
   test('Reprocess with messages', async () => {
     const mockedInteraction = {
       channelId: '1232',
-      reply: jest.fn().mockResolvedValue(),
+      deferReply: jest.fn().mockResolvedValue(),
+      followUp: jest.fn().mockResolvedValue(),
       channel: {
         messages: {
           fetch: jest.fn().mockResolvedValue(new Collection()),
         },
-        send: jest.fn().mockResolvedValue(),
       },
     };
     const collection = new Collection();
@@ -93,8 +79,17 @@ describe('ReprocessCommand Tests', () => {
     });
     mockedInteraction.channel.messages.fetch.mockResolvedValueOnce(collection);
     await reprocessCommand.execute(mockedInteraction);
-    expect(mockedInteraction.reply).toBeCalledWith('Starting Reprocess... Existing scores will not be altered.');
-    expect(mockedInteraction.channel.send).toBeCalled();
+    expect(mockedInteraction.deferReply).toBeCalledWith({content: 'Starting Reprocess... Existing scores will not be altered.', ephemeral: true});
+    expect(mockedInteraction.followUp).toBeCalled();
     expect(mockedInteraction.channel.messages.fetch).toHaveBeenCalledTimes(2);
+  });
+  test('test invalid command', async () => {
+    let error = false;
+    try {
+      await reprocessCommand.execute(null, null);
+    } catch (err) {
+      error = true;
+    }
+    expect(error).toBe(true);
   });
 });

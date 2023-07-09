@@ -1,5 +1,7 @@
 const MonthlyCommand = require('../../src/commands/MonthlyCommand');
 const {Score} = require('../../src/data/Score');
+jest.spyOn(console, 'error').mockImplementation(() => {});
+
 jest.mock('../../src/data/Score', () => {
   return ({
     Score: {
@@ -64,5 +66,15 @@ describe('MonthlyCommand Tests', () => {
 '---------------------'\`\`\`
     **undefined Winner: test**
     *Brought to you by ...*`);
+  });
+
+  test('test invalid command', async () => {
+    let error = false;
+    try {
+      await monthlyCommand.execute(null, null);
+    } catch (err) {
+      error = true;
+    }
+    expect(error).toBe(true);
   });
 });

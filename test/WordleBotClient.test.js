@@ -72,51 +72,51 @@ describe('WordleBotClient Tests', () => {
     jest.clearAllMocks();
   });
   test('Empty Message', async () => {
-    await wordleBot.messageHandler({});
+    await wordleBot.messageHandler({content: '', channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
   test('Empty Message In wordle Channel', async () => {
-    await wordleBot.messageHandler({channelId: '1232', content: ''});
+    await wordleBot.messageHandler({channelId: '1232', content: '', channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
   test('WhoLeft In wordle Channel', async () => {
-    await wordleBot.messageHandler({channelId: '1232', content: '!wholeft', delete: ()=>{}});
+    await wordleBot.messageHandler({channelId: '1232', content: '!wholeft', delete: ()=>{}, channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(1);
   });
   test('WhoLeft In wordle Channel', async () => {
-    await wordleBot.messageHandler({channelId: '1232', content: '/wholeft', delete: ()=>{}});
+    await wordleBot.messageHandler({channelId: '1232', content: '/wholeft', delete: ()=>{}, channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(1);
   });
 
   test('Summary In wordle Channel', async () => {
-    await wordleBot.messageHandler({channelId: '1232', content: '!summary', delete: ()=>{}});
+    await wordleBot.messageHandler({channelId: '1232', content: '!summary', delete: ()=>{}, channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(1);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
   test('Summary In wordle Channel', async () => {
-    await wordleBot.messageHandler({channelId: '1232', content: '/summary', delete: ()=>{}});
+    await wordleBot.messageHandler({channelId: '1232', content: '/summary', delete: ()=>{}, channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(1);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
 
   test('Monthly In wordle Channel', async () => {
-    await wordleBot.messageHandler({channelId: '1232', content: '!monthly', delete: ()=>{}});
+    await wordleBot.messageHandler({channelId: '1232', content: '!monthly', delete: ()=>{}, channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(1);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
   });
   test('Monthly In wordle Channel', async () => {
-    await wordleBot.messageHandler({channelId: '1232', content: '/monthly', delete: ()=>{}});
+    await wordleBot.messageHandler({channelId: '1232', content: '/monthly', delete: ()=>{}, channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(1);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
@@ -126,7 +126,7 @@ describe('WordleBotClient Tests', () => {
     await wordleBot.messageHandler({author: {username: 'test'}, channelId: '1232', content: `Wordle 745 2/6*
 
 🟨⬛🟨🟨⬛
-🟩🟩🟩🟩🟩`, delete: ()=>{}});
+🟩🟩🟩🟩🟩`, delete: ()=>{}, channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(1);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
@@ -137,7 +137,7 @@ describe('WordleBotClient Tests', () => {
     await wordleBot.messageHandler({author: {username: 'test'}, channelId: '1232', content: `Wordle 745 2/6*
 
 🟨⬛🟨🟨⬛
-🟩🟩🟩🟩🟩`, delete: ()=>{}});
+🟩🟩🟩🟩🟩`, delete: ()=>{}, channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
@@ -148,7 +148,7 @@ describe('WordleBotClient Tests', () => {
     await wordleBot.messageHandler({author: {username: 'test'}, channelId: '1232', content: `Wordle 745 2/6*
 
 🟨⬛🟨🟨⬛
-🟩🟩🟩🟩🟩`, delete: ()=>{}});
+🟩🟩🟩🟩🟩`, delete: ()=>{}, channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(1);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(0);
@@ -159,7 +159,7 @@ describe('WordleBotClient Tests', () => {
     await wordleBot.messageHandler({author: {username: 'test'}, channelId: '1232', content: `Wordle 745 2/6*
 
 🟨⬛🟨🟨⬛
-🟩🟩🟩🟩🟩`, delete: ()=>{}});
+🟩🟩🟩🟩🟩`, delete: ()=>{}, channel: {id: '234', guildId: '123'}});
     expect(MonthlyCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(SummaryCommand.getInstance().execute).toHaveBeenCalledTimes(0);
     expect(WhoLeftCommand.getInstance().execute).toHaveBeenCalledTimes(1);
@@ -167,12 +167,12 @@ describe('WordleBotClient Tests', () => {
 
 
   test('Edit Event', async () => {
-    await wordleBot.editEvent({channelId: '1232', content: '/monthly', delete: ()=>{}}, {channelId: '1232', content: '/monthly', delete: ()=>{}});
+    await wordleBot.editEvent({channelId: '1232', content: '/monthly', delete: ()=>{}, channel: {id: '234', guildId: '123'}}, {channelId: '1232', content: '/monthly', delete: ()=>{}, channel: {id: '234', guildId: '123'}});
   });
 
   test('Edit Event Wordle', async () => {
     reply = jest.fn().mockResolvedValue();
-    await wordleBot.editEvent({author: {username: 'test'}, channelId: '1232', content: '/monthly', delete: ()=>{}}, {author: {username: 'test'}, channelId: '1232', content: `Wordle 745 2/6*
+    await wordleBot.editEvent({author: {username: 'test'}, channelId: '1232', content: '/monthly', delete: ()=>{}, channel: {id: '234', guildId: '123'}}, {author: {username: 'test'}, channelId: '1232', channel: {id: '234', guildId: '123'}, content: `Wordle 745 2/6*
 
 🟨⬛🟨🟨⬛
 🟩🟩🟩🟩🟩`, delete: ()=>{}, lineReply: reply});
@@ -182,7 +182,7 @@ describe('WordleBotClient Tests', () => {
   test('Edit Event Wordle', async () => {
     Score.getInstance().getScore.mockResolvedValueOnce(1);
     reply = jest.fn().mockResolvedValue();
-    await wordleBot.editEvent({author: {username: 'test'}, channelId: '1232', content: '/monthly', delete: ()=>{}}, {author: {username: 'test'}, channelId: '1232', content: `Wordle 745 2/6*
+    await wordleBot.editEvent({author: {username: 'test'}, channelId: '1232', content: '/monthly', delete: ()=>{}, channel: {id: '234', guildId: '123'}}, {author: {username: 'test'}, channelId: '1232', channel: {id: '234', guildId: '123'}, content: `Wordle 745 2/6*
 
 🟨⬛🟨🟨⬛
 🟩🟩🟩🟩🟩`, delete: ()=>{}, lineReply: reply});

@@ -5,13 +5,16 @@ const client = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits
 const config = require('config');
 const commands = require('./src/commands');
 
-const WORDLE_CHANNEL_ID = config.get('wordleMonitorChannelID');
-
 const rest = new REST({version: '10'}).setToken(config.get('discordBotToken'));
 client.on(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}`);
+  client.guilds.cache.forEach((guild) => {
+    rest.put(Routes.applicationGuildCommands(config.get('applicationId'), guild.id), {
+      body: Object.keys(commands).map((command) => commands[command].data.toJSON()),
+    });
+  });
   console.log(`Connected to ${client.guilds.cache.size} guilds`);
-  const botClient = new WordleBotClient(client.channels.cache.get(WORDLE_CHANNEL_ID));
+  const botClient = new WordleBotClient();
 
   client.on(Events.MessageUpdate, botClient.editEvent.bind(botClient));
   client.on(Events.MessageCreate, botClient.messageHandler.bind(botClient));
@@ -35,7 +38,4 @@ client.on(Events.ClientReady, async () => {
   });
 });
 
-rest.put(Routes.applicationGuildCommands(config.get('applicationId'), config.get('guildId')), {
-  body: Object.keys(commands).map((command) => commands[command].data.toJSON()),
-});
 client.login(config.get('discordBotToken'));

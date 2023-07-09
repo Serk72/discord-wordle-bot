@@ -35,7 +35,10 @@ class Score {
       UserName VARCHAR (255),
       UserTag VARCHAR (255),
       WordleScore VARCHAR (255),
-      Score INT, Date TIMESTAMP);`;
+      Score INT,
+      GuildId VARCHAR (255),
+      ChannelId VARCHAR (255),
+      Date TIMESTAMP);`;
     this.pool.query(tablesSQL, [], (err, res) => {
       if (err) {
         console.error(err);
@@ -52,10 +55,18 @@ class Score {
    * Gets the users score for the given wordle game if it exists.
    * @param {*} user The user to find the score for.
    * @param {*} wordleGame The wordle game number to look for.
+   * @param {*} guildId Guild Id for the server the score was posted too.
+   * @param {*} channelId Channel id the score was posted too.
    * @return {*} The Score entry if it exists.
    */
-  async getScore(user, wordleGame) {
-    const results = await this.pool.query('SELECT * FROM Score Where UserName = $1 AND WordleGame = $2', [user, wordleGame]);
+  async getScore(user, wordleGame, guildId, channelId) {
+    const results = await this.pool.query(`
+    SELECT * FROM 
+    Score Where
+     UserName = $1
+     AND WordleGame = $2
+     AND GuildId = $3
+     AND ChannelId = $4`, [user, wordleGame, guildId, channelId]);
     return results?.rows?.[0];
   }
 
@@ -81,50 +92,63 @@ class Score {
    * @param {*} wordleScore Wordle String in the formate of "Wordle 742 4/6*"
    * @param {*} wordleGame Wordle game number to store.
    * @param {*} timestamp Timestamp of when the score was recorded.
+   * @param {*} guildId Guild Id for the server the score was posted too.
+   * @param {*} channelId Channel id the score was posted too.
    */
-  async createScore(user, userTag, wordleScore, wordleGame, timestamp) {
+  async createScore(user, userTag, wordleScore, wordleGame, timestamp, guildId, channelId) {
     const subWordle = wordleScore.substring(wordleScore.indexOf(' ')+1);
     let score = Number(subWordle.substring(subWordle.indexOf(' ') + 1, subWordle.indexOf('/')));
     if (Number.isNaN(score)) {
       score = 7;
     }
-    await this.pool.query('INSERT INTO Score(WordleGame, UserName, UserTag, WordleScore, Score, Date) VALUES ($1, $2, $3, $4, $5, to_timestamp($6))', [wordleGame, user, userTag, wordleScore, score, timestamp/1000]);
+    await this.pool.query(`
+    INSERT INTO 
+    Score(WordleGame, UserName, UserTag, WordleScore, Score, Date, GuildId, ChannelId)
+     VALUES ($1, $2, $3, $4, $5, to_timestamp($6), $7, $8)`, [wordleGame, user, userTag, wordleScore, score, timestamp/1000, guildId, channelId]);
   }
 
   /**
    * Gets a list of all usernames in the Score table.
+   * @param {*} guildId Guild Id for the server the score was posted too.
+   * @param {*} channelId Channel id the score was posted too.
    * @return {*} list of all usernames in the Score table.
    */
-  async getTotalPlayers() {
-    const results = await this.pool.query('SELECT DISTINCT(UserName) FROM Score', []);
+  async getTotalPlayers(guildId, channelId) {
+    const results = await this.pool.query('SELECT DISTINCT(UserName) FROM Score WHERE GuildId = $1 AND ChannelId = $2', [guildId, channelId]);
     return results?.rows?.map((row) => row.username);
   }
 
   /**
    * Gets all the usernames that have played the wordle game number.
    * @param {*} wordleGame wordle game number to check.
+   * @param {*} guildId Guild Id for the server the score was posted too.
+   * @param {*} channelId Channel id the score was posted too.
    * @return {*} list of all usernames that have played the game number.
    */
-  async getPlayersForGame(wordleGame) {
-    const results = await this.pool.query('SELECT DISTINCT(UserName) FROM Score WHERE wordlegame = $1', [wordleGame]);
+  async getPlayersForGame(wordleGame, guildId, channelId) {
+    const results = await this.pool.query('SELECT DISTINCT(UserName) FROM Score WHERE wordlegame = $1 AND GuildId = $2 AND ChannelId = $3', [wordleGame, guildId, channelId]);
     return results?.rows?.map((row) => row.username);
   }
 
   /**
    * Gets all the usernames and scores for a game.
    * @param {*} wordleGame wordle game number to check.
+   * @param {*} guildId Guild Id for the server the score was posted too.
+   * @param {*} channelId Channel id the score was posted too.
    * @return {*} list of all usernames and scores in order.
    */
-  async getGameScores(wordleGame) {
-    const results = await this.pool.query('SELECT UserName, Score FROM Score WHERE wordlegame = $1 ORDER By Score, Date', [wordleGame]);
+  async getGameScores(wordleGame, guildId, channelId) {
+    const results = await this.pool.query('SELECT UserName, Score FROM Score WHERE wordlegame = $1 AND GuildId = $2 AND ChannelId = $3 ORDER By Score, Date', [wordleGame, guildId, channelId]);
     return results?.rows;
   }
 
   /**
    * Gets overall summary data for all users.
+   * @param {*} guildId Guild Id for the server the score was posted too.
+   * @param {*} channelId Channel id the score was posted too.
    * @return {*} overall summary data for all users.
    */
-  async getPlayerSummaries() {
+  async getPlayerSummaries(guildId, channelId) {
     const results = await this.pool.query(`
     SELECT 
       COUNT(*) as games, 
@@ -133,16 +157,20 @@ class Score {
       username, 
       (COUNT(CASE WHEN score >= 7 THEN 1 END)) as gameslost 
     FROM SCORE 
+    WHERE
+      GuildId = $1 AND ChannelId = $2
     GROUP BY  Username 
-    ORDER BY Average`);
+    ORDER BY Average`, [guildId, channelId]);
     return results?.rows;
   }
 
   /**
    * Gets last 7 day summary for all users.
+   * @param {*} guildId Guild Id for the server the score was posted too.
+   * @param {*} channelId Channel id the score was posted too.
    * @return {*} last 7 day summary for all users.
    */
-  async getLast7DaysSummaries() {
+  async getLast7DaysSummaries(guildId, channelId) {
     const results = await this.pool.query(`
     SELECT 
       COUNT(*) as games, 
@@ -152,17 +180,19 @@ class Score {
       (COUNT(CASE WHEN score >= 7 THEN 1 END)) as gameslost 
     FROM SCORE 
     WHERE 
-      Date > now() - interval '7 days'
+      Date > now() - interval '7 days' AND GuildId = $1 AND ChannelId = $2
     GROUP BY Username
-    ORDER BY Average`);
+    ORDER BY Average`, [guildId, channelId]);
     return results?.rows;
   }
 
   /**
    * Gets last month summaries for all users.
+   * @param {*} guildId Guild Id for the server the score was posted too.
+   * @param {*} channelId Channel id the score was posted too.
    * @return {*} last month summaries for all users.
    */
-  async getLastMonthSummaries() {
+  async getLastMonthSummaries(guildId, channelId) {
     const results = await this.pool.query(`
     SELECT 
       COUNT(*) as games, 
@@ -173,9 +203,9 @@ class Score {
       to_Char((now() - interval '1 month')::date, 'Month') AS lastmonth 
     FROM SCORE 
     WHERE
-      EXTRACT('MONTH' FROM Date) = EXTRACT('MONTH' FROM Now() - interval '1 month')
+      EXTRACT('MONTH' FROM Date) = EXTRACT('MONTH' FROM Now() - interval '1 month') AND GuildId = $1 AND ChannelId = $2
     GROUP BY UserName
-    ORDER BY Average`);
+    ORDER BY Average`, [guildId, channelId]);
     return results?.rows;
   }
 }

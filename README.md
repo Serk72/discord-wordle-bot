@@ -12,7 +12,6 @@ This application is configured using https://github.com/node-config/node-config 
 
 | Config name                    | JSON Type | Description | Default |
 |--------------------------------|-----------|-------------|---------|
-| `wordleMonitorChannelID`       | String    | The channel ID on discord that will be monitored for wordle scores and is where the bot will send messages |  |
 | `insultUserName`               | String    | Discord username that is specified will get a random insult generated if they are the last to complete the wordle for the day. |  |
 | `discordBotToken`              | String    | Bot token from discord giving the bot access to discord apis. |  |
 | `postgres`                     | Object    | Database connection Info |  | 
@@ -23,7 +22,6 @@ This application is configured using https://github.com/node-config/node-config 
 | `postgres.port`                | Int       | port                          | |
 | `footerMessage`                | String    | If specified, footer that will be sent will all bot messages. |  |
 | `userToNameMap`                | Object    | Map of of string usernames to string display names. |  |
-| `guildId`                      | String    | Discord server Guild Id, this bot only supports commands set for one Guild (discord server), this id can be found by enabling developer settings and right clicking on the desired server | |
 | `applicationId`                | String    | Application Id for the discord bot, used to register commands to a discord server | |
 | `giphyApiKey`                  | String/`false` | API key for giphy. used to post a gif related to the wordle word for the summary. Specify as `false` to have no gif posted | |
 | `wordleFirstWord`              | String/`false` | word to use as the first guess for wordle. if `false` a random first word will be used | `false` |
@@ -31,7 +29,6 @@ This application is configured using https://github.com/node-config/node-config 
 #### Example Config
 ```json
 {
-    "wordleMonitorChannelID": "A changel id number",
     "insultUserName": "a discord username",
     "discordBotToken": "a discord bot token",
     "postgres": {

@@ -1,9 +1,7 @@
 const {SlashCommandBuilder, EmbedBuilder} = require('discord.js');
 const {WordleGame} = require('../data/WordleGame');
 const {Score} = require('../data/Score');
-const config = require('config');
 
-const WORDLE_CHANNEL_ID = config.get('wordleMonitorChannelID');
 const WORDLE_REGEX = /Wordle [0-9]* [0-6Xx]\/[0-6]\*?/g;
 
 /**
@@ -39,11 +37,17 @@ class ReprocessCommand {
      * @param {*} interaction discord interaction if specified the command will reply too.
      */
   async execute(interaction) {
-    if (interaction.channelId !== WORDLE_CHANNEL_ID) {
-      interaction.reply('Reprocessing Only supported for the configured Wordle Channel.');
-      return;
+    let guildId;
+    let channelId;
+    if (interaction) {
+      guildId = interaction.guildId;
+      channelId = interaction.channelId;
+    } else {
+      console.error('invalid Reprocess command call. no interaction or channel');
+      throw new Error('Invalid Reprocess call');
     }
-    interaction.reply('Starting Reprocess... Existing scores will not be altered.');
+
+    interaction.deferReply({content: 'Starting Reprocess... Existing scores will not be altered.', ephemeral: true});
     const discordWordleChannel = interaction.channel;
 
     let tempMessages = await discordWordleChannel.messages.fetch({limit: 50});
@@ -67,9 +71,9 @@ class ReprocessCommand {
           await this.wordleGame.createWordleGame(wordleNumber, message.createdTimestamp);
         }
 
-        if (!(await this.wordleScore.getScore(message.author.username, wordleNumber))) {
+        if (!(await this.wordleScore.getScore(message.author.username, wordleNumber, guildId, channelId))) {
           newScores++;
-          await this.wordleScore.createScore(message.author.username, message.author.tag, wordle, wordleNumber, message.createdTimestamp);
+          await this.wordleScore.createScore(message.author.username, message.author.tag, wordle, wordleNumber, message.createdTimestamp, guildId, channelId);
         }
       }
     }));
@@ -77,7 +81,7 @@ class ReprocessCommand {
         .setTitle(`Finished processing messages.`)
         .setColor('#4169e1'); // set the color of the em
     embed.setDescription(`Processed ${processedMessages} messages. Found ${wordleMessages} wordle scores. Added ${newScores} new Scores.`);
-    await discordWordleChannel.send({embeds: [embed]});
+    await interaction.followUp({embeds: [embed]});
   }
 }
 

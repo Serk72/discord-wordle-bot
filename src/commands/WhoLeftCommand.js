@@ -40,9 +40,21 @@ class WhoLeftCommand {
    * @param {*} discordWordleChannel discord channel to send the command output too, only used if not an interaction.
    */
   async execute(interaction, discordWordleChannel) {
+    let guildId;
+    let channelId;
+    if (interaction) {
+      guildId = interaction.guildId;
+      channelId = interaction.channelId;
+    } else if (discordWordleChannel) {
+      guildId = discordWordleChannel.guildId;
+      channelId = discordWordleChannel.id;
+    } else {
+      console.error('invalid WhoLeft command call. no interaction or channel');
+      throw new Error('Invalid WhoLeft call');
+    }
     const latestGame = await this.wordleGame.getLatestGame();
-    const totalPlayes = await this.wordleScore.getTotalPlayers();
-    const gamePlayers = await this.wordleScore.getPlayersForGame(latestGame);
+    const totalPlayes = await this.wordleScore.getTotalPlayers(guildId, channelId);
+    const gamePlayers = await this.wordleScore.getPlayersForGame(latestGame, guildId, channelId);
     let embed;
     if (totalPlayes.length === gamePlayers.length) {
       embed = new EmbedBuilder()

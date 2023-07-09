@@ -7,7 +7,6 @@ const {MonthlyCommand, SummaryCommand, WhoLeftCommand} = require('./commands');
 
 
 const INSULT_USERNAME = config.get('insultUserName');
-const WORDLE_CHANNEL_ID = config.get('wordleMonitorChannelID');
 const WORDLE_REGEX = /Wordle [0-9]* [0-6Xx]\/[0-6]\*?/g;
 /**
  * Main Bot Class to handle events
@@ -15,12 +14,10 @@ const WORDLE_REGEX = /Wordle [0-9]* [0-6Xx]\/[0-6]\*?/g;
 class WordleBotClient {
   /**
    * Constructor
-   * @param {Channel} channel discord channel to send messages too.
    */
-  constructor(channel) {
+  constructor() {
     this.wordleGame = WordleGame.getInstance();
     this.wordleScore = Score.getInstance();
-    this.discordWordleChannel = channel;
     this.monthlyCommand = MonthlyCommand.getInstance();
     this.summaryCommand = SummaryCommand.getInstance();
     this.whoLeftCommand = WhoLeftCommand.getInstance();
@@ -36,12 +33,15 @@ class WordleBotClient {
     const subWordle = wordle.substring(wordle.indexOf(' ')+1);
     const wordleNumber = Number(subWordle.substring(0, subWordle.indexOf(' ')));
 
+    const guildId = message.channel.guildId;
+    const channelId = message.channel.id;
+
     if (!(await this.wordleGame.getWordleGame(wordleNumber))) {
       await this.wordleGame.createWordleGame(wordleNumber, message.createdTimestamp);
     }
     let newPlay = true;
-    if (!(await this.wordleScore.getScore(message.author.username, wordleNumber))) {
-      await this.wordleScore.createScore(message.author.username, message.author.tag, wordle, wordleNumber, message.createdTimestamp);
+    if (!(await this.wordleScore.getScore(message.author.username, wordleNumber, guildId, channelId))) {
+      await this.wordleScore.createScore(message.author.username, message.author.tag, wordle, wordleNumber, message.createdTimestamp, guildId, channelId);
     } else {
       newPlay = false;
     }
@@ -49,15 +49,15 @@ class WordleBotClient {
     const latestGame = await this.wordleGame.getLatestGame();
     // Only post additional messages if game played was for the latest game.
     if (wordleNumber === Number(latestGame) && newPlay) {
-      const totalPlayes = await this.wordleScore.getTotalPlayers();
-      const gamePlayers = await this.wordleScore.getPlayersForGame(latestGame);
+      const totalPlayes = await this.wordleScore.getTotalPlayers(guildId, channelId);
+      const gamePlayers = await this.wordleScore.getPlayersForGame(latestGame, guildId, channelId);
       const remaining = totalPlayes.filter((player) => !gamePlayers.includes(player));
       console.log(remaining);
       if (!remaining.length) {
-        await this.summaryCommand.execute(null, this.discordWordleChannel);
+        await this.summaryCommand.execute(null, message.channel);
       } else if (remaining.length === 1) {
         if (remaining[0] === INSULT_USERNAME) {
-          await this.whoLeftCommand.execute(null, this.discordWordleChannel);
+          await this.whoLeftCommand.execute(null, message.channel);
         }
       }
     }
@@ -86,12 +86,14 @@ class WordleBotClient {
     console.log('edit Event.');
     console.log(oldMessage?.content);
     console.log(newMessage?.content);
+    const guildId = newMessage.channel.guildId;
+    const channelId = newMessage.channel.id;
     const found = newMessage?.content?.match(WORDLE_REGEX);
     if (found && found.length) {
       const wordle = found[0];
       const subWordle = wordle.substring(wordle.indexOf(' ')+1);
       const wordleNumber = Number(subWordle.substring(0, subWordle.indexOf(' ')));
-      if ((await this.wordleScore.getScore(newMessage.author.username, wordleNumber))) {
+      if ((await this.wordleScore.getScore(newMessage.author.username, wordleNumber, guildId, channelId))) {
         await newMessage.lineReply('I saw that, Edited Wordle Score Ignored.');
       } else {
         await this._addWorldScore(newMessage);
@@ -105,22 +107,19 @@ class WordleBotClient {
    * @return {*}
    */
   async messageHandler(message) {
-    if (message.channelId !== WORDLE_CHANNEL_ID) {
-      return;
-    }
     if (message.content.startsWith(`!${this.whoLeftCommand.data.name}`) || message.content.startsWith(`/${this.whoLeftCommand.data.name}`)) {
       message.delete();
-      await this.whoLeftCommand.execute(null, this.discordWordleChannel);
+      await this.whoLeftCommand.execute(null, message.channel);
       return;
     }
     if (message.content.startsWith(`!${this.summaryCommand.data.name}`) || message.content.startsWith(`/${this.summaryCommand.data.name}`)) {
       message.delete();
-      await this.summaryCommand.execute(null, this.discordWordleChannel);
+      await this.summaryCommand.execute(null, message.channel);
       return;
     }
     if (message.content.startsWith(`!${this.monthlyCommand.data.name}`) || message.content.startsWith(`/${this.monthlyCommand.data.name}`)) {
       message.delete();
-      await this.monthlyCommand.execute(null, this.discordWordleChannel);
+      await this.monthlyCommand.execute(null, message.channel);
       return;
     }
     const found = message?.content?.match(WORDLE_REGEX);

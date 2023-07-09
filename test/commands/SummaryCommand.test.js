@@ -155,4 +155,14 @@ someUrl`);
     **Today's Winner: undefined**
     *Brought to you by ...*`);
   });
+
+  test('test invalid command', async () => {
+    let error = false;
+    try {
+      await summaryCommand.execute(null, null);
+    } catch (err) {
+      error = true;
+    }
+    expect(error).toBe(true);
+  });
 });

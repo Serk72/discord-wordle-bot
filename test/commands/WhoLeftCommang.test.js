@@ -1,5 +1,6 @@
 const WhoLeftCommand = require('../../src/commands/WhoLeftCommand');
 const {Score} = require('../../src/data/Score');
+jest.spyOn(console, 'error').mockImplementation(() => {});
 jest.mock('../../src/data/Score', () => {
   return ({
     Score: {
@@ -52,5 +53,15 @@ describe('WhoLeftCommand Tests', () => {
     Score.getInstance().getTotalPlayers.mockResolvedValueOnce(['someUser']);
     await whoLeftCommand.execute(null, mockedDiscordChannel);
     expect(mockedDiscordChannel.send).toBeCalled();
+  });
+
+  test('test invalid command', async () => {
+    let error = false;
+    try {
+      await whoLeftCommand.execute(null, null);
+    } catch (err) {
+      error = true;
+    }
+    expect(error).toBe(true);
   });
 });
