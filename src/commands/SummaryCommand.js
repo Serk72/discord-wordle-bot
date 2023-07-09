@@ -1,6 +1,6 @@
 const {SlashCommandBuilder} = require('discord.js');
 const {Score} = require('../data/Score');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch-native');
 const {WordleGame} = require('../data/WordleGame');
 const AsciiTable = require('ascii-table');
 const config = require('config');

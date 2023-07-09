@@ -1,11 +1,11 @@
 const {WordleBotClient} = require('../src/WordleBotClient');
 const {Score} = require('../src/data/Score');
 const {MonthlyCommand, SummaryCommand, WhoLeftCommand} = require('../src/commands');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch-native');
 
 jest.spyOn(console, 'error').mockImplementation(() => {});
 jest.spyOn(console, 'log').mockImplementation(() => {});
-jest.mock('node-fetch', () => {
+jest.mock('node-fetch-native', () => {
   return jest.fn().mockResolvedValue({json: () => ({})});
 });
 jest.mock('../src/data/WordleWord', () => {

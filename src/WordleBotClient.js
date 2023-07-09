@@ -1,6 +1,6 @@
 const config = require('config');
 const dayjs = require('dayjs');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch-native');
 const {WordleGame} = require('./data/WordleGame');
 const {Score} = require('./data/Score');
 const {MonthlyCommand, SummaryCommand, WhoLeftCommand} = require('./commands');

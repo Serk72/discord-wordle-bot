@@ -1,10 +1,10 @@
 const SummaryCommand = require('../../src/commands/SummaryCommand');
 const {Score} = require('../../src/data/Score');
 const {WordleGame} = require('../../src/data/WordleGame');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch-native');
 jest.spyOn(console, 'error').mockImplementation(() => {});
 
-jest.mock('node-fetch', () => {
+jest.mock('node-fetch-native', () => {
   return jest.fn().mockResolvedValue({json: () => ({data: [{url: 'someUrl'}]})});
 });
 jest.mock('../../src/data/WordleGame', () => {
