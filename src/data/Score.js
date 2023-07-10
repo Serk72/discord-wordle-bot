@@ -143,6 +143,18 @@ class Score {
   }
 
   /**
+   * Gets all scores for a user with the word that was guessed on.
+   * @param {*} username The username to find scores for
+   * @param {*} guildId Guild Id for the server the score was posted too.
+   * @param {*} channelId Channel id the score was posted too.
+   * @return {*} list of objects containing the word guessed and number of guesses.
+   */
+  async getPlayerScores(username, guildId, channelId) {
+    const result = await this.pool.query('SELECT s.score, g.word FROM Score s JOIN WordleGame g ON s.wordleGame = g.wordleGame Where s.username = $1 AND GuildId = $2 AND ChannelId = $3', [username, guildId, channelId]);
+    return result?.rows;
+  }
+
+  /**
    * Gets overall summary data for all users.
    * @param {*} guildId Guild Id for the server the score was posted too.
    * @param {*} channelId Channel id the score was posted too.

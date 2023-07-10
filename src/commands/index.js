@@ -4,4 +4,5 @@ module.exports = {
   WhoLeftCommand: require('./WhoLeftCommand'),
   ReprocessCommand: require('./ReprocessCommand'),
   PlayWordleCommand: require('./PlayWordleCommand'),
+  ScorePredictorCommand: require('./ScorePredictorCommand'),
 };

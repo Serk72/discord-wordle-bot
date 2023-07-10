@@ -43,8 +43,8 @@ describe('ReprocessCommand Tests', () => {
       },
     };
     await reprocessCommand.execute(mockedInteraction);
-    expect(mockedInteraction.deferReply).toBeCalledWith({content: 'Starting Reprocess... Existing scores will not be altered.', ephemeral: true});
-    expect(mockedInteraction.followUp).toBeCalled();
+    expect(mockedInteraction.deferReply).toBeCalledWith({ephemeral: true});
+    expect(mockedInteraction.followUp).toHaveBeenCalledTimes(2);
     expect(mockedInteraction.channel.messages.fetch).toHaveBeenCalledTimes(1);
   });
 
@@ -79,8 +79,8 @@ describe('ReprocessCommand Tests', () => {
     });
     mockedInteraction.channel.messages.fetch.mockResolvedValueOnce(collection);
     await reprocessCommand.execute(mockedInteraction);
-    expect(mockedInteraction.deferReply).toBeCalledWith({content: 'Starting Reprocess... Existing scores will not be altered.', ephemeral: true});
-    expect(mockedInteraction.followUp).toBeCalled();
+    expect(mockedInteraction.deferReply).toBeCalledWith({ephemeral: true});
+    expect(mockedInteraction.followUp).toHaveBeenCalledTimes(2);
     expect(mockedInteraction.channel.messages.fetch).toHaveBeenCalledTimes(2);
   });
   test('test invalid command', async () => {

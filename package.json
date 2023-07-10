@@ -5,6 +5,7 @@
     "config": "3.3.9",
     "dayjs": "1.11.9",
     "discord.js": "14.11.0",
+    "ml-regression": "^5.0.0",
     "node-fetch-native": "1.2.0",
     "pg": "8.11.1"
   },

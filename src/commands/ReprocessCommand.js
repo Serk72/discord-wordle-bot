@@ -47,7 +47,8 @@ class ReprocessCommand {
       throw new Error('Invalid Reprocess call');
     }
 
-    interaction.deferReply({content: 'Starting Reprocess... Existing scores will not be altered.', ephemeral: true});
+    interaction.deferReply({ephemeral: true});
+    interaction.followUp({content: 'Starting Reprocess... Existing scores will not be altered.', ephemeral: true});
     const discordWordleChannel = interaction.channel;
 
     let tempMessages = await discordWordleChannel.messages.fetch({limit: 50});
