@@ -24,6 +24,7 @@ This application is configured using https://github.com/node-config/node-config 
 | `userToNameMap`                | Object    | Map of of string usernames to string display names. |  |
 | `applicationId`                | String    | Application Id for the discord bot, used to register commands to a discord server | |
 | `giphyApiKey`                  | String/`false` | API key for giphy. used to post a gif related to the wordle word for the summary. Specify as `false` to have no gif posted | |
+| `tenorApiKey`                  | String/`false` | API key for tenor. Will be used above giphy as a source of gifs | |
 | `wordleFirstWord`              | String/`false` | word to use as the first guess for wordle. if `false` a random first word will be used | `false` |
 
 #### Example Config

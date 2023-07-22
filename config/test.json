@@ -3,6 +3,7 @@
     "insultUserName": "someUser",
     "discordBotToken": "dfhslkdf",
     "giphyApiKey": "someAPIKEY",
+    "tenorApiKey": false,
     "userToNameMap": {
         "someUser": "Name"
     },

@@ -92,21 +92,38 @@ ${summaryTable.toString()}\`\`\`
     **Today's Winner: ${USER_TO_NAME_MAP[latestScores?.[0]?.username] || latestScores?.[0]?.username}**
     ${FOOTER_MESSAGE ? `*${FOOTER_MESSAGE}*`: ''}`;
     if (latestGame?.word && latestGame?.word?.trim() !== '') {
-      const giphyApiKey = config.get('giphyApiKey');
-      if (giphyApiKey) {
-        const url = `http://api.giphy.com/v1/gifs/search?api_key=${giphyApiKey}&q=${latestGame?.word}&limit=1`;
+      const tenorApiKey = config.get('tenorApiKey');
+      if (tenorApiKey) {
+        const url = `https://tenor.googleapis.com/v2/search?key=${tenorApiKey}&q=${latestGame?.word}&limit=1`;
         const response = await fetch(url, {method: 'Get'})
             .then((res) => res?.json())
             .catch((ex) => {
               console.error(ex);
               return null;
             });
-
-        if (response?.data?.[0]?.url) {
-          messageToSend = `${messageToSend}\n${response?.data?.[0]?.url}`;
+        if (response?.results?.[0]?.media_formats?.gif?.url) {
+          messageToSend = `${messageToSend}\n${response?.results?.[0]?.media_formats?.gif?.url}`;
         } else {
           console.error('Giphy Invalid Response.');
           console.error(response);
+        }
+      } else {
+        const giphyApiKey = config.get('giphyApiKey');
+        if (giphyApiKey) {
+          const url = `http://api.giphy.com/v1/gifs/search?api_key=${giphyApiKey}&q=${latestGame?.word}&limit=1`;
+          const response = await fetch(url, {method: 'Get'})
+              .then((res) => res?.json())
+              .catch((ex) => {
+                console.error(ex);
+                return null;
+              });
+
+          if (response?.data?.[0]?.url) {
+            messageToSend = `${messageToSend}\n${response?.data?.[0]?.url}`;
+          } else {
+            console.error('Giphy Invalid Response.');
+            console.error(response);
+          }
         }
       }
     }
