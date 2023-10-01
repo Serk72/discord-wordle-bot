@@ -61,7 +61,7 @@ describe('SummaryCommand Tests', () => {
     ***Overall Leader: test***
     **7 Day Leader: test**
     **undefined Winner: undefined**
-    **Today's Winner: undefined**
+    **Today's Winners: undefined**
     *Brought to you by ...*`);
   });
 
@@ -89,7 +89,7 @@ describe('SummaryCommand Tests', () => {
     ***Overall Leader: test***
     **7 Day Leader: test**
     **undefined Winner: undefined**
-    **Today's Winner: undefined**
+    **Today's Winners: undefined**
     *Brought to you by ...*`);
   });
 
@@ -120,7 +120,7 @@ describe('SummaryCommand Tests', () => {
     ***Overall Leader: test***
     **7 Day Leader: test**
     **undefined Winner: undefined**
-    **Today's Winner: undefined**
+    **Today's Winners: undefined**
     *Brought to you by ...*
 someUrl`);
   });
@@ -152,7 +152,7 @@ someUrl`);
     ***Overall Leader: test***
     **7 Day Leader: test**
     **undefined Winner: undefined**
-    **Today's Winner: undefined**
+    **Today's Winners: undefined**
     *Brought to you by ...*`);
   });
 

@@ -68,9 +68,10 @@ class MonthlyCommand {
           row.gameslost,
           row.average);
     });
+    const lastMonthLeaderIndex = lastMonthSummary?.[0]?.username === 'Wordle Bot' ? 1 : 0;
     const messageToSend = `\`\`\`
 ${summaryTable.toString()}\`\`\`
-    **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${USER_TO_NAME_MAP[lastMonthSummary?.[0]?.username] || lastMonthSummary?.[0]?.username}**
+    **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${USER_TO_NAME_MAP[lastMonthSummary?.[lastMonthLeaderIndex]?.username] || lastMonthSummary?.[lastMonthLeaderIndex]?.username}**
     ${FOOTER_MESSAGE ? `*${FOOTER_MESSAGE}*`: ''}`;
 
     if (interaction) {

@@ -114,7 +114,7 @@ class Score {
    * @return {*} list of all usernames in the Score table.
    */
   async getTotalPlayers(guildId, channelId) {
-    const results = await this.pool.query('SELECT DISTINCT(UserName) FROM Score WHERE GuildId = $1 AND ChannelId = $2', [guildId, channelId]);
+    const results = await this.pool.query(`SELECT DISTINCT(UserName) FROM Score WHERE GuildId = $1 AND ChannelId = $2 AND UserName != 'Wordle Bot' AND Date > now() - interval '7 days'`, [guildId, channelId]);
     return results?.rows?.map((row) => row.username);
   }
 
@@ -126,7 +126,7 @@ class Score {
    * @return {*} list of all usernames that have played the game number.
    */
   async getPlayersForGame(wordleGame, guildId, channelId) {
-    const results = await this.pool.query('SELECT DISTINCT(UserName) FROM Score WHERE wordlegame = $1 AND GuildId = $2 AND ChannelId = $3', [wordleGame, guildId, channelId]);
+    const results = await this.pool.query(`SELECT DISTINCT(UserName) FROM Score WHERE wordlegame = $1 AND GuildId = $2 AND ChannelId = $3 AND UserName != 'Wordle Bot' AND Date > now() - interval '7 days'`, [wordleGame, guildId, channelId]);
     return results?.rows?.map((row) => row.username);
   }
 

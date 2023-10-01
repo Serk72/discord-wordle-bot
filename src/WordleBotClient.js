@@ -47,8 +47,8 @@ class WordleBotClient {
     }
 
     const latestGame = await this.wordleGame.getLatestGame();
-    // Only post additional messages if game played was for the latest game.
-    if (wordleNumber === Number(latestGame) && newPlay) {
+    // Only post additional messages if game played was for the latest game and not bot post.
+    if (wordleNumber === Number(latestGame) && newPlay && message.author.username !== 'Wordle Bot') {
       const totalPlayes = await this.wordleScore.getTotalPlayers(guildId, channelId);
       const gamePlayers = await this.wordleScore.getPlayersForGame(latestGame, guildId, channelId);
       const remaining = totalPlayes.filter((player) => !gamePlayers.includes(player));

@@ -83,13 +83,30 @@ class SummaryCommand {
           row.average,
           day7Summary.average);
     });
-
+    const overallLeaderIndex = overallSummary?.[0]?.username === 'Wordle Bot' ? 1 : 0;
+    const day7LeaderIndex = day7Summary?.[0]?.username === 'Wordle Bot' ? 1 : 0;
+    const lastMonthLeaderIndex = lastMonthSummary?.[0]?.username === 'Wordle Bot' ? 1 : 0;
+    let lowestScore = 8;
+    const todayByScore = latestScores.reduce((acc, scoreVal) => {
+      if (scoreVal.username === 'Wordle Bot') {
+        return acc;
+      }
+      if (lowestScore > +scoreVal.score) {
+        lowestScore = +scoreVal.score;
+      }
+      if (!acc[+scoreVal.score]?.length) {
+        acc[+scoreVal.score] = [USER_TO_NAME_MAP[scoreVal.username] || scoreVal.username];
+      } else {
+        acc[+scoreVal.score].push(USER_TO_NAME_MAP[scoreVal.username] || scoreVal.username);
+      }
+      return acc;
+    }, {});
     let messageToSend = `\`\`\`
 ${summaryTable.toString()}\`\`\`
-    ***Overall Leader: ${USER_TO_NAME_MAP[overallSummary?.[0]?.username] || overallSummary?.[0]?.username}***
-    **7 Day Leader: ${USER_TO_NAME_MAP[day7Summary?.[0]?.username] || day7Summary?.[0]?.username}**
-    **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${USER_TO_NAME_MAP[lastMonthSummary?.[0]?.username] || lastMonthSummary?.[0]?.username}**
-    **Today's Winner: ${USER_TO_NAME_MAP[latestScores?.[0]?.username] || latestScores?.[0]?.username}**
+    ***Overall Leader: ${USER_TO_NAME_MAP[overallSummary?.[overallLeaderIndex]?.username] || overallSummary?.[overallLeaderIndex]?.username}***
+    **7 Day Leader: ${USER_TO_NAME_MAP[day7Summary?.[day7LeaderIndex]?.username] || day7Summary?.[day7LeaderIndex]?.username}**
+    **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${USER_TO_NAME_MAP[lastMonthSummary?.[lastMonthLeaderIndex]?.username] || lastMonthSummary?.[lastMonthLeaderIndex]?.username}**
+    **Today's Winners: ${todayByScore[lowestScore]?.join(', ')}**
     ${FOOTER_MESSAGE ? `*${FOOTER_MESSAGE}*`: ''}`;
     if (latestGame?.word && latestGame?.word?.trim() !== '') {
       const tenorApiKey = config.get('tenorApiKey');

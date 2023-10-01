@@ -89,12 +89,12 @@ class ScorePredictorCommand {
       const prediction = model.predict(calculateStringVal(word));
       summaryTable.addRow(
           USER_TO_NAME_MAP[user] || user,
-        prediction <= 6 ? prediction.toFixed(2) : 'To Loose');
+        prediction <= 6 ? prediction.toFixed(0) : 'To Loose');
     }));
 
 
     await interaction.followUp({content: `\`\`\`
-${summaryTable.toString()}\`\`\``, ephemeral: false});
+${summaryTable.toString()}\`\`\``, ephemeral: true});
   }
 }
 
