@@ -109,7 +109,7 @@ describe('SummaryCommand Tests', () => {
       word: 'tests',
     });
     await summaryCommand.execute(null, mockedDiscordChannel);
-    expect(mockedDiscordChannel.send).toBeCalledWith(`\`\`\`
+    expect(mockedDiscordChannel.send).toBeCalledWith({content: `\`\`\`
 .----------------------.
 |    Wordle Summary    |
 |----------------------|
@@ -121,8 +121,7 @@ describe('SummaryCommand Tests', () => {
     **7 Day Leader: test**
     **undefined Winner: undefined**
     **Today's Winners: undefined**
-    *Brought to you by ...*
-someUrl`);
+    *Brought to you by ...*`, files: [{attachment: 'someUrl', name: 'SPOILER_FILE.gif'}]});
   });
   test('summary with results Channel with giphy link error', async () => {
     fetch.mockResolvedValueOnce(new Error());

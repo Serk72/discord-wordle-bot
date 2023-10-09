@@ -101,13 +101,14 @@ class SummaryCommand {
       }
       return acc;
     }, {});
-    let messageToSend = `\`\`\`
+    const messageToSend = `\`\`\`
 ${summaryTable.toString()}\`\`\`
     ***Overall Leader: ${USER_TO_NAME_MAP[overallSummary?.[overallLeaderIndex]?.username] || overallSummary?.[overallLeaderIndex]?.username}***
     **7 Day Leader: ${USER_TO_NAME_MAP[day7Summary?.[day7LeaderIndex]?.username] || day7Summary?.[day7LeaderIndex]?.username}**
     **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${USER_TO_NAME_MAP[lastMonthSummary?.[lastMonthLeaderIndex]?.username] || lastMonthSummary?.[lastMonthLeaderIndex]?.username}**
     **Today's Winners: ${todayByScore[lowestScore]?.join(', ')}**
     ${FOOTER_MESSAGE ? `*${FOOTER_MESSAGE}*`: ''}`;
+    let imageToSend;
     if (latestGame?.word && latestGame?.word?.trim() !== '') {
       const tenorApiKey = config.get('tenorApiKey');
       if (tenorApiKey) {
@@ -119,7 +120,7 @@ ${summaryTable.toString()}\`\`\`
               return null;
             });
         if (response?.results?.[0]?.media_formats?.gif?.url) {
-          messageToSend = `${messageToSend}\n${response?.results?.[0]?.media_formats?.gif?.url}`;
+          imageToSend = response?.results?.[0]?.media_formats?.gif?.url;
         } else {
           console.error('Giphy Invalid Response.');
           console.error(response);
@@ -136,7 +137,7 @@ ${summaryTable.toString()}\`\`\`
               });
 
           if (response?.data?.[0]?.url) {
-            messageToSend = `${messageToSend}\n${response?.data?.[0]?.url}`;
+            imageToSend = response?.data?.[0]?.url;
           } else {
             console.error('Giphy Invalid Response.');
             console.error(response);
@@ -145,9 +146,29 @@ ${summaryTable.toString()}\`\`\`
       }
     }
     if (interaction) {
-      interaction.reply(messageToSend);
+      if (imageToSend) {
+        await interaction.reply({
+          content: messageToSend,
+          files: [{
+            attachment: imageToSend,
+            name: 'SPOILER_FILE.gif',
+          }],
+        });
+      } else {
+        await interaction.reply(messageToSend);
+      }
     } else {
-      await discordWordleChannel.send(messageToSend);
+      if (imageToSend) {
+        await discordWordleChannel.send({
+          content: messageToSend,
+          files: [{
+            attachment: imageToSend,
+            name: 'SPOILER_FILE.gif',
+          }],
+        });
+      } else {
+        await discordWordleChannel.send(messageToSend);
+      }
     }
   }
 }
