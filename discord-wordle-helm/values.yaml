@@ -1,7 +1,10 @@
 # Default values for pi-whole.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
+ingress:
+  enbabled: false
+service:
+  type: ''
 image:
   repository: node
   pullPolicy: IfNotPresent

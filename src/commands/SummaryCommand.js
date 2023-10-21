@@ -36,6 +36,52 @@ class SummaryCommand {
   }
 
   /**
+   * Asyncronusly gets the url for a gif for the provided wordle game.
+   * @param {*} latestGame game to find an image of.
+   * @return {string} image url to a gif of undefined if none can be retrieved.
+   */
+  async getImage(latestGame) {
+    let imageToSend;
+    if (latestGame?.word && latestGame?.word?.trim() !== '') {
+      const tenorApiKey = config.get('tenorApiKey');
+      if (tenorApiKey) {
+        const url = `https://tenor.googleapis.com/v2/search?key=${tenorApiKey}&q=${latestGame?.word}&limit=1`;
+        const response = await fetch(url, {method: 'Get'})
+            .then((res) => res?.json())
+            .catch((ex) => {
+              console.error(ex);
+              return null;
+            });
+        if (response?.results?.[0]?.media_formats?.gif?.url) {
+          imageToSend = response?.results?.[0]?.media_formats?.gif?.url;
+        } else {
+          console.error('Giphy Invalid Response.');
+          console.error(response);
+        }
+      } else {
+        const giphyApiKey = config.get('giphyApiKey');
+        if (giphyApiKey) {
+          const url = `http://api.giphy.com/v1/gifs/search?api_key=${giphyApiKey}&q=${latestGame?.word}&limit=1`;
+          const response = await fetch(url, {method: 'Get'})
+              .then((res) => res?.json())
+              .catch((ex) => {
+                console.error(ex);
+                return null;
+              });
+
+          if (response?.data?.[0]?.url) {
+            imageToSend = response?.data?.[0]?.url;
+          } else {
+            console.error('Giphy Invalid Response.');
+            console.error(response);
+          }
+        }
+      }
+    }
+    return imageToSend;
+  }
+
+  /**
      * Calculates and sends the overall average summaries for all players in the game.
      * @param {*} interaction discord interaction if specified the command will reply too.
      * @param {*} discordWordleChannel discord channel to send the command output too, only used if not an interaction.
@@ -53,12 +99,18 @@ class SummaryCommand {
       console.error('invalid Summary command call. no interaction or channel');
       throw new Error('Invalid Summary call');
     }
-    const overallSummary = await this.wordleScore.getPlayerSummaries(guildId, channelId);
-    const day7Summary = await this.wordleScore.getLast7DaysSummaries(guildId, channelId);
-    const lastMonthSummary = await this.wordleScore.getLastMonthSummaries(guildId, channelId);
-    const latestGameNumber = await this.wordleGame.getLatestGame();
-    const latestGame = await this.wordleGame.getWordleGame(latestGameNumber);
-    const latestScores = await this.wordleScore.getGameScores(latestGameNumber, guildId, channelId);
+
+    const [overallSummary, day7Summary, lastMonthSummary, latestGameNumber] = await Promise.all([
+      this.wordleScore.getPlayerSummaries(guildId, channelId),
+      this.wordleScore.getLast7DaysSummaries(guildId, channelId),
+      this.wordleScore.getLastMonthSummaries(guildId, channelId),
+      this.wordleGame.getLatestGame(),
+    ]);
+    const [latestGame, latestScores] = await Promise.all([
+      this.wordleGame.getWordleGame(latestGameNumber),
+      this.wordleScore.getGameScores(latestGameNumber, guildId, channelId),
+    ]);
+    let imageToSend = this.getImage(latestGame);
     const sum7dayByUser = day7Summary.reduce((acc, sum) => {
       acc[sum.username] = sum;
       return acc;
@@ -108,46 +160,12 @@ ${summaryTable.toString()}\`\`\`
     **${lastMonthSummary?.[0]?.lastmonth?.trim()} Winner: ${USER_TO_NAME_MAP[lastMonthSummary?.[lastMonthLeaderIndex]?.username] || lastMonthSummary?.[lastMonthLeaderIndex]?.username}**
     **Today's Winners: ${todayByScore[lowestScore]?.join(', ')}**
     ${FOOTER_MESSAGE ? `*${FOOTER_MESSAGE}*`: ''}`;
-    let imageToSend;
-    if (latestGame?.word && latestGame?.word?.trim() !== '') {
-      const tenorApiKey = config.get('tenorApiKey');
-      if (tenorApiKey) {
-        const url = `https://tenor.googleapis.com/v2/search?key=${tenorApiKey}&q=${latestGame?.word}&limit=1`;
-        const response = await fetch(url, {method: 'Get'})
-            .then((res) => res?.json())
-            .catch((ex) => {
-              console.error(ex);
-              return null;
-            });
-        if (response?.results?.[0]?.media_formats?.gif?.url) {
-          imageToSend = response?.results?.[0]?.media_formats?.gif?.url;
-        } else {
-          console.error('Giphy Invalid Response.');
-          console.error(response);
-        }
-      } else {
-        const giphyApiKey = config.get('giphyApiKey');
-        if (giphyApiKey) {
-          const url = `http://api.giphy.com/v1/gifs/search?api_key=${giphyApiKey}&q=${latestGame?.word}&limit=1`;
-          const response = await fetch(url, {method: 'Get'})
-              .then((res) => res?.json())
-              .catch((ex) => {
-                console.error(ex);
-                return null;
-              });
-
-          if (response?.data?.[0]?.url) {
-            imageToSend = response?.data?.[0]?.url;
-          } else {
-            console.error('Giphy Invalid Response.');
-            console.error(response);
-          }
-        }
-      }
-    }
+    imageToSend = await imageToSend;
     if (interaction) {
+      await interaction.deferReply({ephemeral: true});
+      await interaction.followUp({content: 'Processing...', ephemeral: true});
       if (imageToSend) {
-        await interaction.reply({
+        await interaction.followUp({
           content: messageToSend,
           files: [{
             attachment: imageToSend,
@@ -155,7 +173,7 @@ ${summaryTable.toString()}\`\`\`
           }],
         });
       } else {
-        await interaction.reply(messageToSend);
+        await interaction.followUp(messageToSend);
       }
     } else {
       if (imageToSend) {

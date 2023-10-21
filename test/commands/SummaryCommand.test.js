@@ -48,9 +48,9 @@ describe('SummaryCommand Tests', () => {
       games: '1',
       average: '7',
     }]);
-    const mockedInteraction = {reply: jest.fn().mockResolvedValue()};
+    const mockedInteraction = {followUp: jest.fn().mockResolvedValue(), deferReply: jest.fn().mockResolvedValue()};
     await summaryCommand.execute(mockedInteraction);
-    expect(mockedInteraction.reply).toBeCalledWith(`\`\`\`
+    expect(mockedInteraction.followUp).toBeCalledWith(`\`\`\`
 .----------------------.
 |    Wordle Summary    |
 |----------------------|
