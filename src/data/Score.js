@@ -162,7 +162,7 @@ class Score {
    */
   async getPlayerSummaries(guildId, channelId) {
     const results = await this.pool.query(`
-    SELECT 
+    SELECT * FROM (SELECT 
       COUNT(*) as games, 
       SUM(Score) as totalscore, 
       ROUND(CAST(SUM(Score)::float/COUNT(*)::float as numeric), 2) AS Average,  
@@ -170,9 +170,9 @@ class Score {
       (COUNT(CASE WHEN score >= 7 THEN 1 END)) as gameslost 
     FROM SCORE 
     WHERE
-      GuildId = $1 AND ChannelId = $2 AND games >= 10
+      GuildId = $1 AND ChannelId = $2 AND
     GROUP BY  Username 
-    ORDER BY Average`, [guildId, channelId]);
+    ORDER BY Average) as summary WHERE games >= 10`, [guildId, channelId]);
     return results?.rows;
   }
 
@@ -206,7 +206,7 @@ class Score {
    */
   async getLastMonthSummaries(guildId, channelId) {
     const results = await this.pool.query(`
-    SELECT 
+    SELECT * FROM (SELECT 
       COUNT(*) as games, 
       SUM(Score) as totalscore, 
       ROUND(CAST(SUM(Score)::float/COUNT(*)::float as numeric), 2) AS Average, 
@@ -215,9 +215,9 @@ class Score {
       to_Char((now() - interval '1 month')::date, 'Month') AS lastmonth 
     FROM SCORE s JOIN WORDLEGAME w ON w.wordlegame = s.wordlegame
     WHERE
-      EXTRACT('MONTH' FROM w.Date) = EXTRACT('MONTH' FROM Now() - interval '1 month') AND GuildId = $1 AND ChannelId = $2 AND games >= 10
+      EXTRACT('MONTH' FROM w.Date) = EXTRACT('MONTH' FROM Now() - interval '1 month') AND GuildId = $1 AND ChannelId = $2
     GROUP BY UserName
-    ORDER BY Average`, [guildId, channelId]);
+    ORDER BY Average) AS summary WHERE games >= 10`, [guildId, channelId]);
     return results?.rows;
   }
 }
