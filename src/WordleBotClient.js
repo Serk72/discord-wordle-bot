@@ -72,7 +72,7 @@ class WordleBotClient {
             console.error(ex);
             return null;
           });
-      if (solution?.solution) {
+      if (solution?.solution && solution?.solution?.trim() !== '') {
         await this.wordleGame.addWord(solution.days_since_launch, solution.solution);
       } else {
         console.error('Unable to get solution');

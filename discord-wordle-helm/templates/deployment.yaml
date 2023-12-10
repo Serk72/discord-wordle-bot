@@ -37,7 +37,8 @@ spec:
       restartPolicy: Always
       dnsPolicy: ClusterFirstWithHostNet
       enableServiceLinks: true
-      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/hostname: home-server
       {{- if .Values.existingClaimName }}
       volumes:
         - name: discord-wordle-pvc
