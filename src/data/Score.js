@@ -170,7 +170,7 @@ class Score {
       (COUNT(CASE WHEN score >= 7 THEN 1 END)) as gameslost 
     FROM SCORE 
     WHERE
-      GuildId = $1 AND ChannelId = $2 AND
+      GuildId = $1 AND ChannelId = $2
     GROUP BY  Username 
     ORDER BY Average) as summary WHERE games >= 10`, [guildId, channelId]);
     return results?.rows;
