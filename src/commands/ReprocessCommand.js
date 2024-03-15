@@ -66,7 +66,7 @@ class ReprocessCommand {
         wordleMessages++;
         const wordle = found[0];
         const subWordle = wordle.substring(wordle.indexOf(' ')+1);
-        const wordleNumber = Number(subWordle.substring(0, subWordle.indexOf(' ')));
+        const wordleNumber = Number(subWordle.substring(0, subWordle.indexOf(' ')).replaceAll(',', ''));
 
         if (!(await this.wordleGame.getWordleGame(wordleNumber))) {
           await this.wordleGame.createWordleGame(wordleNumber, message.createdTimestamp);

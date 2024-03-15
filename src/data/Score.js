@@ -77,7 +77,7 @@ class Score {
     const results = await this.pool.query('SELECT * FROM Score');
     await Promise.all(results?.rows?.map((row) => {
       const subWordle = row.wordlescore.substring(row.wordlescore.indexOf(' ')+1);
-      let score = Number(subWordle.substring(subWordle.indexOf(' ') + 1, subWordle.indexOf('/')));
+      let score = Number(subWordle.substring(subWordle.indexOf('/') - 1, subWordle.indexOf('/')));
       if (Number.isNaN(score)) {
         score = 7;
       }
@@ -97,7 +97,7 @@ class Score {
    */
   async createScore(user, userTag, wordleScore, wordleGame, timestamp, guildId, channelId) {
     const subWordle = wordleScore.substring(wordleScore.indexOf(' ')+1);
-    let score = Number(subWordle.substring(subWordle.indexOf(' ') + 1, subWordle.indexOf('/')));
+    let score = Number(subWordle.substring(subWordle.indexOf('/') - 1, subWordle.indexOf('/')));
     if (Number.isNaN(score)) {
       score = 7;
     }

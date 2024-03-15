@@ -7,7 +7,7 @@ const {MonthlyCommand, SummaryCommand, WhoLeftCommand} = require('./commands');
 
 
 const INSULT_USERNAME = config.get('insultUserName');
-const WORDLE_REGEX = /Wordle [0-9]* [0-6Xx]\/[0-6]\*?/g;
+const WORDLE_REGEX = /Wordle [0-9,]* .*[0-6Xx]\/[0-6]\*?/g;
 /**
  * Main Bot Class to handle events
  */
@@ -31,7 +31,7 @@ class WordleBotClient {
     const found = message?.content?.match(WORDLE_REGEX);
     const wordle = found[0];
     const subWordle = wordle.substring(wordle.indexOf(' ')+1);
-    const wordleNumber = Number(subWordle.substring(0, subWordle.indexOf(' ')));
+    const wordleNumber = Number(subWordle.substring(0, subWordle.indexOf(' ')).replaceAll(',', ''));
 
     const guildId = message.channel.guildId;
     const channelId = message.channel.id;
@@ -95,7 +95,7 @@ class WordleBotClient {
     if (found && found.length) {
       const wordle = found[0];
       const subWordle = wordle.substring(wordle.indexOf(' ')+1);
-      const wordleNumber = Number(subWordle.substring(0, subWordle.indexOf(' ')));
+      const wordleNumber = Number(subWordle.substring(0, subWordle.indexOf(' ')).replaceAll(',', ''));
       if ((await this.wordleScore.getScore(newMessage.author.username, wordleNumber, guildId, channelId))) {
         await newMessage.lineReply('I saw that, Edited Wordle Score Ignored.');
       } else {
