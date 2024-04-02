@@ -7,6 +7,8 @@ const client = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits
 const config = require('config');
 const commands = require('./src/commands');
 const WORDLE_CHANNEL_ID = config.get('autoPostSummaryChannel');
+const AUTO_POST_HOUR = config.get('autoPostHour');
+const AUTO_POST_MIN = config.get('autoPostMin');
 const runAtSpecificTimeOfDay = (hour, minutes, func) => {
   const twentyFourHours = 86400000;
   const now = new Date();
@@ -57,11 +59,14 @@ client.on(Events.ClientReady, async () => {
 
 client.login(config.get('discordBotToken'));
 
+if (WORDLE_CHANNEL_ID) {
+  runAtSpecificTimeOfDay(AUTO_POST_HOUR, AUTO_POST_MIN, async () => {
+    console.log(`Checking if Summary is to be posted.`);
+    const wordleChannel = client.channels.cache.get(WORDLE_CHANNEL_ID);
+    if (!(await WordleGame.getInstance().getLatestGameSummaryPosted())) {
+      await SummaryCommand.getInstance().execute(null, wordleChannel);
+      await WordleGame.getInstance().summaryPosted(await WordleGame.getInstance().getLatestGame());
+    }
+  });
+}
 
-runAtSpecificTimeOfDay(22, 0, async () => {
-  const wordleChannel = client.channels.cache.get(WORDLE_CHANNEL_ID);
-  if (!(await WordleGame.getInstance().getLatestGameSummaryPosted())) {
-    await SummaryCommand.getInstance().execute(null, wordleChannel);
-    await WordleGame.getInstance().summaryPosted(await WordleGame.getInstance().getLatestGame());
-  }
-});

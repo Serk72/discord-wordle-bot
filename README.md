@@ -26,6 +26,9 @@ This application is configured using https://github.com/node-config/node-config 
 | `giphyApiKey`                  | String/`false` | API key for giphy. used to post a gif related to the wordle word for the summary. Specify as `false` to have no gif posted | |
 | `tenorApiKey`                  | String/`false` | API key for tenor. Will be used above giphy as a source of gifs | |
 | `wordleFirstWord`              | String/`false` | word to use as the first guess for wordle. if `false` a random first word will be used | `false` |
+| `autoPostSummaryChannel`       | String    |  Channel Id to which summaries will be automatically posted at the end of the day. Timer is disabled if not specified. | | 
+| `autoPostHour`                 | Int       | Hour in 24 hour format at which time auto summaries will be posted. Will be in local time of the container | 22 |
+| `autoPostMin`                  | Int       | Minute of the hour to post the auto summaries | 0 |  
 
 #### Example Config
 ```json

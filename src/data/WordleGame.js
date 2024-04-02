@@ -111,7 +111,7 @@ class WordleGame {
    * @param {*} game wordle Game number.
    */
   async summaryPosted(game) {
-    await this.pool.query(`UPDATE WordleGame SET SummaryPosted = TRUE WHERE wordlegame = $2`, [game]);
+    await this.pool.query(`UPDATE WordleGame SET SummaryPosted = TRUE WHERE wordlegame = $1`, [game]);
   }
 }
 module.exports = {WordleGame};
