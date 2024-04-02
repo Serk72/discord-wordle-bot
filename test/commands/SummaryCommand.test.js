@@ -14,6 +14,7 @@ jest.mock('../../src/data/WordleGame', () => {
         getWordleGame: jest.fn().mockResolvedValue(),
         createWordleGame: jest.fn().mockResolvedValue(),
         getLatestGame: jest.fn().mockResolvedValue(1),
+        summaryPosted: jest.fn().mockResolvedValue(),
       }),
     },
   });

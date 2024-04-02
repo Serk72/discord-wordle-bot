@@ -18,6 +18,8 @@ spec:
       containers:
         - name: discord-wordle
           env:
+          - name: TZ
+            value: US/Eastern
           - name: NODE_ENV
             value: "prod"
           image: "{{ .Values.image.repository}}:{{ .Values.image.tag }}"

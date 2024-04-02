@@ -32,7 +32,7 @@ describe('WordlePlayer Tests', () => {
   });
   test('lost game.', async () => {
     const played = await wordlePlayer.playGame(1234);
-    expect(played).toEqual(`Wordle 1234 X/6*
+    expect(played).toEqual(`Wordle 1,234 X/6*
 
 🟩⬛🟨🟨⬛
 🟩⬛🟨🟨⬛
@@ -52,7 +52,7 @@ describe('WordlePlayer Tests', () => {
   test('Win in one', async () => {
     WordleWord.getInstance().getRandomWord.mockResolvedValueOnce('slate');
     const played = await wordlePlayer.playGame(1234);
-    expect(played).toEqual(`Wordle 1234 1/6*
+    expect(played).toEqual(`Wordle 1,234 1/6*
 
 🟩🟩🟩🟩🟩
 `);
@@ -61,7 +61,7 @@ describe('WordlePlayer Tests', () => {
   test('No guesses', async () => {
     WordleWord.getInstance().getRandomWord.mockResolvedValueOnce(null);
     const played = await wordlePlayer.playGame(1234);
-    expect(played).toEqual(`Wordle 1234 X/6*
+    expect(played).toEqual(`Wordle 1,234 X/6*
 
 `);
   });
@@ -69,7 +69,7 @@ describe('WordlePlayer Tests', () => {
   test('configured first word', async () => {
     config.get.mockReturnValueOnce('slate');
     const played = await wordlePlayer.playGame(1234);
-    expect(played).toEqual(`Wordle 1234 1/6*
+    expect(played).toEqual(`Wordle 1,234 1/6*
 
 🟩🟩🟩🟩🟩
 `);

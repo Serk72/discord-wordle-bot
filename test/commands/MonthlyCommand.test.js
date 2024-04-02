@@ -19,12 +19,12 @@ describe('MonthlyCommand Tests', () => {
   test('test no results Channel', async () => {
     const mockedDiscordChannel = {send: jest.fn().mockResolvedValue()};
     await monthlyCommand.execute(null, mockedDiscordChannel);
-    expect(mockedDiscordChannel.send).toBeCalledWith('No Montly data found.');
+    expect(mockedDiscordChannel.send).toBeCalledWith('No Monthly data found.');
   });
   test('test no results Interaction', async () => {
     const mockedInteraction = {reply: jest.fn().mockResolvedValue()};
     await monthlyCommand.execute(mockedInteraction);
-    expect(mockedInteraction.reply).toBeCalledWith('No Montly data found.');
+    expect(mockedInteraction.reply).toBeCalledWith('No Monthly data found.');
   });
   test('monthly with results Interaction', async () => {
     Score.getInstance().getLastMonthSummaries.mockResolvedValueOnce( [{

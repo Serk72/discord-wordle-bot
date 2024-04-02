@@ -50,7 +50,7 @@ class PlayWordleCommand {
     let messageToSend = await this.wordlePlayer.playGame(gameNumber);
 
     if (!messageToSend) {
-      messageToSend = `Unable to play Wordle Game: ${gameNumber}`;
+      messageToSend = `Unable to play Wordle Game: ${gameNumber.toLocaleString()}`;
     }
     if (interaction) {
       await interaction.reply(messageToSend);

@@ -1,9 +1,26 @@
 const {Client, GatewayIntentBits, Events, Routes, REST} = require('discord.js');
 const {WordleBotClient} = require('./src/WordleBotClient');
+const {SummaryCommand} = require('./src/commands');
+const {WordleGame} = require('./src/data/WordleGame');
 
 const client = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent]});
 const config = require('config');
 const commands = require('./src/commands');
+const WORDLE_CHANNEL_ID = config.get('autoPostSummaryChannel');
+const runAtSpecificTimeOfDay = (hour, minutes, func) => {
+  const twentyFourHours = 86400000;
+  const now = new Date();
+  let etaMS = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minutes, 0, 0).getTime() - now;
+  if (etaMS < 0) {
+    etaMS += twentyFourHours;
+  }
+  setTimeout(() => {
+    // run once
+    func();
+    // run every 24 hours from now on
+    setInterval(func, twentyFourHours);
+  }, etaMS);
+};
 
 const rest = new REST({version: '10'}).setToken(config.get('discordBotToken'));
 client.on(Events.ClientReady, async () => {
@@ -39,3 +56,12 @@ client.on(Events.ClientReady, async () => {
 });
 
 client.login(config.get('discordBotToken'));
+
+
+runAtSpecificTimeOfDay(22, 0, async () => {
+  const wordleChannel = client.channels.cache.get(WORDLE_CHANNEL_ID);
+  if (!(await WordleGame.getInstance().getLatestGameSummaryPosted())) {
+    await SummaryCommand.getInstance().execute(null, wordleChannel);
+    await WordleGame.getInstance().summaryPosted(await WordleGame.getInstance().getLatestGame());
+  }
+});

@@ -188,6 +188,7 @@ ${summaryTable.toString()}\`\`\`
         await discordWordleChannel.send(messageToSend);
       }
     }
+    this.wordleGame.summaryPosted(latestGameNumber);
   }
 }
 

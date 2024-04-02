@@ -53,9 +53,9 @@ class MonthlyCommand {
     const lastMonthSummary = await this.wordleScore.getLastMonthSummaries(guildId, channelId);
     if (!lastMonthSummary.length) {
       if (interaction) {
-        await interaction.reply('No Montly data found.');
+        await interaction.reply('No Monthly data found.');
       } else {
-        await discordWordleChannel.send('No Montly data found.');
+        await discordWordleChannel.send('No Monthly data found.');
       }
       return;
     }

@@ -33,6 +33,7 @@ class WordleGame {
       Id serial PRIMARY KEY,
       WordleGame INT NOT NULL UNIQUE,
       Word VARCHAR (255),
+      SummaryPosted BOOLEAN,
       Date TIMESTAMP);`;
     this.pool.query(tablesSQL, (err, res) => {
       if (err) {
@@ -71,6 +72,15 @@ class WordleGame {
   }
 
   /**
+   * Finds the latest game recorded in the database.
+   * @return {*} the latest game recorded in the database.
+   */
+  async getLatestGameSummaryPosted() {
+    const results = await this.pool.query('SELECT * FROM WordleGame ORDER BY WordleGame DESC LIMIT 1', []);
+    return results?.rows?.[0]?.summaryposted;
+  }
+
+  /**
    * Creates a wordle game entry.
    * @param {*} wordleGame The game number to add.
    * @param {*} timestamp The timestamp of when the game was added.
@@ -94,6 +104,14 @@ class WordleGame {
    */
   async addWord(game, word) {
     await this.pool.query(`UPDATE WordleGame SET word = $1 WHERE wordlegame = $2`, [word, game]);
+  }
+
+  /**
+   * Marks the summary as posted.
+   * @param {*} game wordle Game number.
+   */
+  async summaryPosted(game) {
+    await this.pool.query(`UPDATE WordleGame SET SummaryPosted = TRUE WHERE wordlegame = $2`, [game]);
   }
 }
 module.exports = {WordleGame};

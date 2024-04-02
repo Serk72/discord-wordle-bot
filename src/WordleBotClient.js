@@ -3,7 +3,7 @@ const dayjs = require('dayjs');
 const fetch = require('node-fetch-native');
 const {WordleGame} = require('./data/WordleGame');
 const {Score} = require('./data/Score');
-const {MonthlyCommand, SummaryCommand, WhoLeftCommand} = require('./commands');
+const {MonthlyCommand, SummaryCommand, WhoLeftCommand, PlayWordleCommand} = require('./commands');
 
 
 const INSULT_USERNAME = config.get('insultUserName');
@@ -21,6 +21,7 @@ class WordleBotClient {
     this.monthlyCommand = MonthlyCommand.getInstance();
     this.summaryCommand = SummaryCommand.getInstance();
     this.whoLeftCommand = WhoLeftCommand.getInstance();
+    this.playWordleCommand = PlayWordleCommand.getInstance();
   }
 
   /**
@@ -74,6 +75,7 @@ class WordleBotClient {
           });
       if (solution?.solution && solution?.solution?.trim() !== '') {
         await this.wordleGame.addWord(solution.days_since_launch, solution.solution);
+        await this.playWordleCommand.execute(null, message.channel);
       } else {
         console.error('Unable to get solution');
         console.error(solution);

@@ -215,7 +215,9 @@ class Score {
       to_Char((now() - interval '1 month')::date, 'Month') AS lastmonth 
     FROM SCORE s JOIN WORDLEGAME w ON w.wordlegame = s.wordlegame
     WHERE
-      EXTRACT('MONTH' FROM w.Date) = EXTRACT('MONTH' FROM Now() - interval '1 month') AND GuildId = $1 AND ChannelId = $2
+      EXTRACT('MONTH' FROM w.Date) = EXTRACT('MONTH' FROM Now() - interval '1 month')
+      AND EXTRACT('YEAR' FROM w.Date) = EXTRACT('YEAR' FROM Now() - interval '1 month')
+      AND GuildId = $1 AND ChannelId = $2
     GROUP BY UserName
     ORDER BY Average) AS summary WHERE games >= 10`, [guildId, channelId]);
     return results?.rows;

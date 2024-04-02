@@ -74,7 +74,7 @@ class WordlePlayer {
         break;
       }
     }
-    return `Wordle ${wordleGameNumber} ${score >= 7 ? 'X': score}/6*
+    return `Wordle ${wordleGameNumber.toLocaleString()} ${score >= 7 ? 'X': score}/6*
 
 ${playedGame}`;
   }
