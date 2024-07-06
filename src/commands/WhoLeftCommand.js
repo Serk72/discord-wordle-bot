@@ -115,14 +115,15 @@ class WhoLeftCommand {
    */
   async getAIMessage(latestGame) {
     let response;
+    let messages;
     if (OLLAMA_CONFIG.generateMessages) {
-      const messages = (await this.aiMessages.getMessageList('wordleInsults')) || [];
+      messages = (await this.aiMessages.getMessageList('wordleInsults')) || [];
       messages.push({
         role: 'user',
         content: `Generate an insult for Wordle Game ${latestGame}`,
       });
       const url = `${OLLAMA_CONFIG.host}:${OLLAMA_CONFIG.port}/api/chat`;
-      const response = await fetch(url,
+      response = await fetch(url,
           {
             method: 'POST',
             dispatcher: new Agent(
