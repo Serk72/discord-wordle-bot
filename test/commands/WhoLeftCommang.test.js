@@ -32,9 +32,14 @@ describe('WhoLeftCommand Tests', () => {
   });
 
   test('Everyone done, empty respons Interaction', async () => {
-    const mockedInteraction = {reply: jest.fn().mockResolvedValue()};
+    const mockedInteraction = {
+      reply: jest.fn().mockResolvedValue(),
+      deferReply: jest.fn().mockResolvedValue(),
+      followUp: jest.fn().mockResolvedValue(),
+    };
     await whoLeftCommand.execute(mockedInteraction);
-    expect(mockedInteraction.reply).toBeCalled();
+    expect(mockedInteraction.deferReply).toBeCalled();
+    expect(mockedInteraction.followUp).toBeCalled();
   });
 
   test('1 left Channel', async () => {

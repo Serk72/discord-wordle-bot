@@ -1,9 +1,11 @@
 {
     "wordleMonitorChannelID": "1232",
     "insultUserName": "someUser",
+    "insultUserId": "someName",
     "discordBotToken": "dfhslkdf",
     "giphyApiKey": "someAPIKEY",
     "tenorApiKey": false,
+    "logLevel": "info",
     "userToNameMap": {
         "someUser": "Name"
     },
@@ -13,6 +15,12 @@
         "user": "asds",
         "host": "postgres-host",
         "port": 5432
+    },
+    "ollama": {
+        "generateMessages": false,
+        "host": "asdasd",
+        "port": 1231,
+        "insultModelName": "zasfsadf"
     },
     "footerMessage": "Brought to you by ...",
     "guildId": "2309252",
